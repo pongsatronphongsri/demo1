@@ -30,7 +30,9 @@ pool.query(` select * from printer `,(err,result,fields)=>{
     return console.log(result);
 })
 
-app.get('/', function(req, res) {
+
+
+/*app.get('/', function(req, res) {
     pool.query('SELECT * FROM printer', (err, result) => {
         if (err) {
             // หากมีข้อผิดพลาดในการดึงข้อมูล
@@ -38,6 +40,25 @@ app.get('/', function(req, res) {
         } else {
             // หากดึงข้อมูลสำเร็จ ส่งข้อมูลไปยังหน้า index.html
             res.render('pages/index', { printers: result });
+        }
+    });
+});*/
+app.get('/', function(req, res) {
+    pool.query('SELECT * FROM printer', (err, printersResult) => {
+        if (err) {
+            // หากมีข้อผิดพลาดในการดึงข้อมูล printer
+            res.render('pages/error', { error: 'Error fetching printer data' });
+        } else {
+            // หากดึงข้อมูล printer สำเร็จ
+            pool.query('SELECT * FROM category', (err, categoriesResult) => {
+                if (err) {
+                    // หากมีข้อผิดพลาดในการดึงข้อมูล category
+                    res.render('pages/error', { error: 'Error fetching category data' });
+                } else {
+                    // หากดึงข้อมูล category สำเร็จ ส่งข้อมูลไปยังหน้า index.html
+                    res.render('pages/index', { printers: printersResult, categories: categoriesResult });
+                }
+            });
         }
     });
 });
@@ -61,7 +82,7 @@ app.get('/cart', function(req, res) {
 app.get('/detail', function(req, res) {
     res.render('pages/detail');
 });*/
-
+/*
 app.get('/detail', function(req, res) {
     const productId = req.query.id; // รับค่า ID ของสินค้าจาก URL
     pool.query('SELECT * FROM printer WHERE id = ?', [productId], (err, result) => {
@@ -72,6 +93,32 @@ app.get('/detail', function(req, res) {
             // หากดึงข้อมูลสินค้าสำเร็จ
             const product = result[0];
             res.render('pages/detail', { product: product });
+        }
+    });
+});*/
+
+app.get('/detail', function(req, res) {
+    const productId = req.query.id; // รับค่า ID ของสินค้าจาก URL
+
+    // Query ข้อมูลสินค้าจากฐานข้อมูล
+    pool.query('SELECT * FROM printer WHERE id = ?', [productId], (err, productResult) => {
+        if (err || productResult.length === 0) {
+            // หากเกิดข้อผิดพลาดหรือไม่พบสินค้า
+            res.render('pages/error', { error: 'Product not found' });
+        } else {
+            // Query ข้อมูล Category จากฐานข้อมูล
+            pool.query('SELECT * FROM category', (err, categoryResult) => {
+                if (err) {
+                    // หากเกิดข้อผิดพลาดในการดึงข้อมูล Category
+                    res.render('pages/error', { error: 'Error fetching categories' });
+                } else {
+                    // หากดึงข้อมูล Category สำเร็จ
+                    const product = productResult[0];
+                    const categories = categoryResult; // สมมติว่า categoryResult เป็น array ของ categories
+
+                    res.render('pages/detail', { product: product, categories: categories });
+                }
+            });
         }
     });
 });

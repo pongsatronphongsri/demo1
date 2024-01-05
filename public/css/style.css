@@ -4173,6 +4173,7 @@ input[type="button"].btn-block {
   }
   .navbar-expand-lg .navbar-nav .dropdown-menu {
     position: absolute;
+   
   }
   .navbar-expand-lg .navbar-nav .nav-link {
     padding-right: 0.5rem;
@@ -9709,6 +9710,15 @@ a.text-dark:hover, a.text-dark:focus {
   z-index: 11;
   animation: action 1s infinite alternate;
 }
+.nav-link.dropdown-toggle {
+  display: block;
+  white-space: normal;
+}
+.navbar-vertical {
+  overflow-y: auto;
+  max-height: calc(100vh - 65px); /* 65px คือความสูงของ Navbar */
+}
+
 
 
 
