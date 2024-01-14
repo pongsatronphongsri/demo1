@@ -13,7 +13,7 @@
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">  
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
@@ -27,77 +27,93 @@
 </head>
 
 <body>
-<!-- Topbar Start -->
-<div class="container-fluid">
-    <div class="row bg-secondary py-1 px-xl-5">
-        <!-- Your existing content -->
-        <!-- ... -->
-    </div>
-    <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
-        <!-- Logo or brand -->
-        <div class="col-lg-4">
-            <a href="" class="text-decoration-none">
-                <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
-                <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
-            </a>
+    <!-- Topbar Start -->
+    <div class="container-fluid">
+        <div class="row bg-secondary py-1 px-xl-5">
+            <!-- Your existing content -->
+            <!-- ... -->
         </div>
-        <!-- Search bar -->
-        <div class="col-lg-4 col-6 text-left">
-            <form action="">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่">
-                    <div class="input-group-append">
-                        <span class="input-group-text bg-transparent text-primary">
-                            <i class="fa fa-search"></i>
-                        </span>
+        <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
+            <!-- Logo or brand -->
+            <div class="col-lg-4">
+                <a href="" class="text-decoration-none">
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
+                </a>
+            </div>
+            <!-- Search bar -->
+            <div class="col-lg-4 col-6 text-left">
+                <form action="">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่">
+                        <div class="input-group-append">
+                            <span class="input-group-text bg-transparent text-primary">
+                                <i class="fa fa-search"></i>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- Button groups -->
+            <div class="col-lg-4 text-right">
+                <div class="btn-group mr-2">
+                    <button type="button" class="btn btn-sm btn-light dropdown-toggle" data-toggle="dropdown">
+                        <% if (username) { %>
+                            <%= username %> <!-- Display the username if available -->
+                                <% } else { %>
+                                    เข้าสู่ระบบ <!-- Show a default message if the user is not logged in -->
+                                    <% } %>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <% if (username) { %>
+                            <!-- If logged in, show a logout link -->
+                            <a href="/logout" class="dropdown-item">ออกจากระบบ</a>
+                            <% } else { %>
+                                <!-- If not logged in, show login and register links -->
+                                <a href="/login" class="dropdown-item">เข้าสู่ระบบ</a>
+                                <a href="/register" class="dropdown-item">สมัครสมาชิก</a>
+                                <% } %>
                     </div>
                 </div>
-            </form>
-        </div>
-        <!-- Button groups -->
-        <div class="col-lg-4 text-right">
-            <div class="btn-group mr-2">
-                <button type="button" class="btn btn-sm btn-light dropdown-toggle"
-                    data-toggle="dropdown">เข้าสู่ระบบ</button>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <button class="dropdown-item" type="button">เข้าสู่ระบบ</button>
-                    <button class="dropdown-item" type="button">สมัครสมาชิก</button>
-                </div>
-            </div>
-            <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-light dropdown-toggle"
-                    data-toggle="dropdown">ภาษาไทย</button>
-                <div class="dropdown-menu dropdown-menu-right">
-                    <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาไทย</button>
-                    <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาอังกฤษ</button>
-                    <!-- Add more language options if needed -->
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-light dropdown-toggle"
+                        data-toggle="dropdown">ภาษาไทย</button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาไทย</button>
+                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาอังกฤษ</button>
+                        <!-- Add more language options if needed -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Topbar End -->
+    <!-- Topbar End -->
 
     <!-- Navbar Start -->
     <div class="container-fluid bg-dark mb-30">
         <div class="row px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
-                <a class="btn d-flex align-items-center justify-content-between bg-primary w-100" data-toggle="collapse" href="#navbar-vertical" style="height: 65px; padding: 0 30px;">
+                <a class="btn d-flex align-items-center justify-content-between bg-primary w-100" data-toggle="collapse"
+                    href="#navbar-vertical" style="height: 65px; padding: 0 30px;">
                     <h6 class="text-dark m-0"><i class="fa fa-bars mr-2"></i>หมวดหมู่สินค้า</h6>
                     <i class="fa fa-angle-down text-dark"></i>
                 </a>
-                <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light" id="navbar-vertical" style="width: calc(100% - 30px); z-index: 999;">
+                <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light"
+                    id="navbar-vertical" style="width: calc(100% - 30px); z-index: 999;">
                     <div class="navbar-nav w-100">
                         <div class="nav-item dropdown dropright">
-                            <% categories.forEach(category => { %>
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" style="font-size: 14px;"><%= category.name %></a>
-                            <% }); %>
-                           
+                            <% categories.forEach(category=> { %>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                                    style="font-size: 14px;">
+                                    <%= category.name %>
+                                </a>
+                                <% }); %>
+
                         </div>
                     </div>
                 </nav>
 
-                        
+
             </div>
             <div class="col-lg-9">
                 <nav class="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
@@ -117,11 +133,13 @@
                         <div class="navbar-nav ml-auto py-0 d-none d-lg-block">
                             <a href="" class="btn px-0">
                                 <i class="fas fa-heart text-primary"></i>
-                                <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                                <span class="badge text-secondary border border-secondary rounded-circle"
+                                    style="padding-bottom: 2px;">0</span>
                             </a>
                             <a href="" class="btn px-0 ml-3">
                                 <i class="fas fa-shopping-cart text-primary"></i>
-                                <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">0</span>
+                                <span class="badge text-secondary border border-secondary rounded-circle"
+                                    style="padding-bottom: 2px;">0</span>
                             </a>
                         </div>
                     </div>
@@ -132,7 +150,7 @@
     <!-- Navbar End -->
 
 
-    
+
 
 
     <!-- Shop Detail Start -->
@@ -144,21 +162,25 @@
                         <div class="carousel-item active">
                             <img class="w-100 h-100" src="<%= product.picture %>" alt="Image">
                         </div>
-        
+
                     </div>
-                  
+
                 </div>
             </div>
 
             <div class="col-lg-7 h-auto mb-30">
                 <div class="h-100 bg-light p-30">
-                    <h3>ชื่อสินค้า : <%= product.name %></h3>
-                   
-                    <h3 class="font-weight-semi-bold mb-4">$<%= product.price %></h3>
-                    <p class="mb-4"><%= product.discription %></p>
-                    
-                    
-                    <div class="d-flex align-items-center mb-4 pt-2">
+                    <h3>ชื่อสินค้า : <%= product.name %>
+                    </h3>
+
+                    <h3 class="font-weight-semi-bold mb-4">$<%= product.price %>
+                    </h3>
+                    <p class="mb-4">
+                        <%= product.discription %>
+                    </p>
+
+
+                    <!-- <div class="d-flex align-items-center mb-4 pt-2">
                         <div class="input-group quantity mr-3" style="width: 130px;">
                             <div class="input-group-btn">
                                 <button class="btn btn-primary btn-minus">
@@ -172,9 +194,26 @@
                                 </button>
                             </div>
                         </div>
-                        <button class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i> Add To
-                            Cart</button>
-                    </div>
+                      
+                        <button class="btn btn-primary px-3" id="addToCartBtn"><i class="fa fa-shopping-cart mr-1"></i>
+                            Add To Cart</button>
+
+                    </div> -->
+                    <!-- Add to Cart Form -->
+                    <!-- Add to Cart Form -->
+                    <!-- Add to Cart Form -->
+                    <form action="/add-to-cart" method="post">
+                        <% if (sessionData.user && sessionData.user.id) { %>
+                            <input type="hidden" name="userId" value="<%= sessionData.user.id %>">
+                            <% } %>
+                                <input type="hidden" name="productId" value="<%= product.id %>">
+                                <label for="quantity">จำนวน:</label>
+                                <input type="number" name="quantity" value="1" min="1" required>
+                                <!-- Add other form elements if needed -->
+                                <button type="submit">หยิบใส่ตระกร้า</button>
+                    </form>
+
+
                     <div class="d-flex pt-2">
                         <strong class="text-dark mr-2">Share on:</strong>
                         <div class="d-inline-flex">
@@ -200,15 +239,15 @@
                 <div class="bg-light p-30">
                     <div class="nav nav-tabs mb-4">
                         <a class="nav-item nav-link text-dark active" data-toggle="tab" href="#tab-pane-1">คำอธิบาย</a>
-                       
+
                     </div>
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="tab-pane-1">
                             <h4 class="mb-3">รายละเอียดสินค้า</h4>
-                          <%= product.details %>
-                           
+                            <%= product.details %>
+
                         </div>
-                       
+
                     </div>
                 </div>
             </div>
@@ -217,7 +256,7 @@
     <!-- Shop Detail End -->
 
 
-   
+
 
 
     <!-- Footer Start -->
@@ -226,7 +265,8 @@
             <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
                 <h5 class="text-secondary text-uppercase mb-4">ติดต่อ</h5>
                 <p class="mb-4">ราษฏรดำริ เทศบาลเมืองปราจีนบุรี 25000</p>
-                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>xxxxx,อำเภอเมืองปราจีนบุรี, ปราจีนบุรี
+                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>277/2,อำเภอเมืองปราจีนบุรี,
+                    ปราจีนบุรี
                 </p>
                 <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>chinnawat@jiantblue.co.th</p>
                 <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>037 452 142</p>
@@ -240,7 +280,7 @@
                             <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>สินค้า</a>
                             <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ช้อปปิ้ง</a>
                             <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ติดต่อ</a>
-    
+
                         </div>
                     </div>
                     <div class="col-md-4 mb-5">
@@ -264,7 +304,7 @@
                 </div>
             </div>
         </div>
-    
+
     </div>
     <!-- Footer End -->
 
@@ -285,6 +325,8 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script src="js/test.js"></script>
+
 </body>
 
 </html>

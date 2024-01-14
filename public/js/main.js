@@ -99,6 +99,69 @@
         }
         button.parent().parent().find('input').val(newVal);
     });
-    
+
+
+
+    // เลือกปุ่มหรือลิงก์ Add to Cart และเพิ่ม Event Listener เมื่อมีการคลิก
+document.querySelector('.add-to-cart-btn').addEventListener('click', function(event) {
+    event.preventDefault(); // ป้องกันการโหลดหน้าใหม่เมื่อคลิกที่ลิงก์
+  
+    const productId = this.getAttribute('data-product-id'); // ดึงข้อมูล product ID จาก attribute data-product-id
+  
+    // ส่งคำขอไปยังเซิร์ฟเวอร์เพื่อเพิ่มสินค้าลงในตะกร้า
+    fetch('/add-to-cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId: productId, quantity: 1 }), // ส่งข้อมูล product ID และจำนวน 1 ไปยังเซิร์ฟเวอร์
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.text();
+    })
+    .then(data => {
+      console.log(data); // แสดงข้อความที่ได้รับจากเซิร์ฟเวอร์ (อาจเป็น "Item added to cart successfully")
+      // ต่อไปคุณอาจทำการอัปเดต UI เพื่อแสดงการเพิ่มสินค้าลงในตะกร้า หรือปรับปรุงข้อมูลต่างๆ ตามต้องการ
+    })
+    .catch(error => {
+      console.error('There was a problem with the fetch operation:', error);
+      // ทำการจัดการข้อผิดพลาดเช่นแสดงข้อความผิดพลาดหรือทำอะไรตามที่คุณต้องการ
+    });
+  });
+
+  // เลือกปุ่ม "Add To Cart" โดยใช้ ID และเพิ่ม Event Listener เมื่อมีการคลิก
+document.getElementById('addToCartBtn').addEventListener('click', function(event) {
+    event.preventDefault(); // ป้องกันการโหลดหน้าใหม่เมื่อคลิกที่ปุ่ม
+
+    // เรียกใช้ฟังก์ชันหรือส่งคำขอไปยังเซิร์ฟเวอร์เพื่อเพิ่มสินค้าลงในฐานข้อมูล
+    addToCart(); // ตัวอย่างการเรียกใช้ฟังก์ชันสำหรับการเพิ่มสินค้าลงในฐานข้อมูล
+});
+
+// Add a script to handle the form submission and redirect to the cart page
+document.getElementById('addToCartForm').addEventListener('submit', function (event) {
+    // Prevent the default form submission
+    event.preventDefault();
+
+    // Submit the form asynchronously using AJAX
+    fetch('/add-to-cart', {
+        method: 'POST',
+        body: new FormData(event.target),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Redirect to the cart page after successful submission
+        window.location.href = '/cart';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Handle errors if needed
+    });
+});   
 })(jQuery);
+
+
+  
 
