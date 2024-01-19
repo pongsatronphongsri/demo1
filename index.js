@@ -187,12 +187,41 @@ app.post('/login', (req, res) => {
         }
     });
 });
-app.get('/admin', verifyAdmin, (req, res) => {
-    console.log('Admin page route accessed');
+// app.get('/admin', verifyAdmin, (req, res) => {
+//     console.log('Admin page route accessed');
     
-    const username = req.session.user.username;
-    res.render('pages/admin', { username });
+//     const username = req.session.user.username;
+//     res.render('pages/admin', { username });
+// });
+// function verifyAdmin(req, res, next) {
+//     if (req.session.user && req.session.user.isAdmin) {
+//         next();
+//     } else {
+//         res.status(403).send('Forbidden: Access denied');
+//     }
+// }
+app.get('/admin', verifyAdmin, async (req, res) => {
+    try {
+        console.log('Admin page route accessed');
+
+        const username = req.session.user.username;
+
+        // Assume you fetch categories from the database (replace this with your actual logic)
+        connection.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                console.error('Error fetching category:', err);
+                res.status(500).send(`Error fetching category: ${err.message}`);
+                return;
+            }
+
+            res.render('pages/admin', { username, categories: categoriesResult, sessionData: req.session });
+        });
+    } catch (error) {
+        console.error('Error accessing admin page:', error);
+        res.status(500).send('Internal Server Error');
+    }
 });
+
 function verifyAdmin(req, res, next) {
     if (req.session.user && req.session.user.isAdmin) {
         next();
@@ -200,6 +229,8 @@ function verifyAdmin(req, res, next) {
         res.status(403).send('Forbidden: Access denied');
     }
 }
+
+
 
 
 //logout

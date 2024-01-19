@@ -7,34 +7,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop</title>
+    <!-- Link to Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 
 <body>
-    <h1>Shop</h1>
-<!-- views/pages/shop.ejs -->
+    <div class="container mt-4">
+        <h1 class="mb-4">Shop</h1>
 
+        <% if (products.length > 0) { %>
+            <% products.forEach(product => { %>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= product.model %></h5>
+                        <p class="card-text">Brands:</p>
+                        <ul class="list-unstyled">
+                            <% product.brands.forEach(brand => { %>
+                                <li><%= brand.brand_name %></li>
+                            <% }); %>
+                        </ul>
 
+                        <!-- Dropdown list for brands -->
+                        <div class="form-group mt-3">
+                            <label for="brandDropdown">Select Brand:</label>
+                            <select class="form-control" id="brandDropdown">
+                                <option value="">All Brands</option>
+                                <% product.brands.forEach(brand => { %>
+                                    <option value="<%= brand.brand_id %>"><%= brand.brand_name %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No products available.</p>
+        <% } %>
+    </div>
 
-
-
-<% if (products.length > 0) { %>
-    <ul>
-        <% products.forEach(product => { %>
-            <li>
-                <h2><%= product.model %></h2>
-                <p>Brands:</p>
-                <ul>
-                    <% product.brands.forEach(brand => { %>
-                        <li><%= brand.brand_name %></li>
-                    <% }); %>
-                </ul>
-            </li>
-        <% }); %>
-    </ul>
-<% } else { %>
-    <p>No products available.</p>
-<% } %>
-
+    <!-- Link to Bootstrap JS and Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 
 </html>
