@@ -317,34 +317,40 @@ app.get('/shop', function (req, res) {
         LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id;
     `;
 
-    pool.query(sqlQuery, (err, results) => {
-        if (err) {
-            return res.render('pages/error', { error: 'Error fetching data' });
-        }
+    // Assume you fetch categories from the database (replace this with your actual logic)
+    pool.query('SELECT * FROM categories', (err, categoriesResult) => {
+        const categories = categoriesResult || [];
 
-        const products = results.reduce((acc, result) => {
-            const existingProduct = acc.find(p => p.product_id === result.product_id);
-            if (existingProduct) {
-                existingProduct.brands.push({
-                    brand_id: result.brand_id,
-                    brand_name: result.brand_name
-                });
-            } else {
-                acc.push({
-                    product_id: result.product_id,
-                    model: result.model,
-                    brands: [{
+        pool.query(sqlQuery, (err, results) => {
+            const products = results.reduce((acc, result) => {
+                const existingProduct = acc.find(p => p.product_id === result.product_id);
+                if (existingProduct) {
+                    existingProduct.brands.push({
                         brand_id: result.brand_id,
                         brand_name: result.brand_name
-                    }]
-                });
-            }
-            return acc;
-        }, []);
+                    });
+                } else {
+                    acc.push({
+                        product_id: result.product_id,
+                        model: result.model,
+                        brands: [{
+                            brand_id: result.brand_id,
+                            brand_name: result.brand_name
+                        }]
+                    });
+                }
+                return acc;
+            }, []);
 
-        res.render('pages/shop', { products });
+            // Assume you have the username available in the session (replace this with your actual logic)
+            const username = req.session.user ? req.session.user.username : null;
+
+            res.render('pages/shop', { products, username, categories });
+        });
     });
 });
+
+
 
 
 
