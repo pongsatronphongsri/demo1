@@ -1,0 +1,31 @@
+<!-- brand-detail.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Detail</title>
+    <!-- Include Bootstrap CSS and JavaScript if needed -->
+</head>
+
+<body>
+    <h1>Brand Detail</h1>
+
+    <% if (productDetails.length > 0) { %>
+        <% productDetails.forEach(product => { %>
+            
+               
+              
+                    <p><strong>Brand Details:</strong> <%= product.brand_details %></p>
+               
+            
+        <% }); %>
+    <% } else { %>
+        <p>No products available for this brand.</p>
+    <% } %>
+
+</body>
+
+</html>

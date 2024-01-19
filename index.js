@@ -311,7 +311,7 @@ app.get('/', function (req, res) {
 
 app.get('/shop', function (req, res) {
     const sqlQuery = `
-        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_details.detail
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
         FROM products
         LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
         LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
@@ -328,16 +328,18 @@ app.get('/shop', function (req, res) {
                 if (existingProduct) {
                     existingProduct.brands.push({
                         brand_id: result.brand_id,
-                        brand_name: result.brand_name
+                        brand_name: result.brand_name,
+                        details: result.details
                     });
                 } else {
                     acc.push({
                         product_id: result.product_id,
                         model: result.model,
-                        detail: result.detail,
+                        product_detail: result.product_detail,
                         brands: [{
                             brand_id: result.brand_id,
-                            brand_name: result.brand_name
+                            brand_name: result.brand_name,
+                            details: result.details
                         }]
                     });
                 }
@@ -349,6 +351,36 @@ app.get('/shop', function (req, res) {
 
             res.render('pages/shop', { products, username, categories });
         });
+    });
+});
+
+
+// Assuming your app is an Express app
+app.get('/brand-detail/:brandId', function(req, res) {
+    const brandId = req.params.brandId;
+
+    // Perform a database query to get brand and product details based on brandId
+    const sqlQuery = `
+        SELECT products.product_id, products.model, product_brand_relationship.details AS brand_details
+        FROM products
+        JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        WHERE product_brand_relationship.brand_id = ?;
+    `;
+
+    pool.query(sqlQuery, [brandId], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const productDetails = results.map(result => ({
+            product_id: result.product_id,
+            model: result.model,
+            brand_details: result.brand_details
+        }));
+
+        // Render the brand detail page with the retrieved details
+        res.render('pages/brand-detail', { productDetails });
     });
 });
 

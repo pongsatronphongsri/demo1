@@ -166,35 +166,32 @@
                     <div class="card-body">
                         <h5 class="card-title"><%= product.model %></h5>
                         <div class="card-text">
-                            <p class="truncate-text">
-                                <%= product.detail %>
-                            </p>
+                            <p><strong>Product Details:</strong> <%= product.product_detail %></p>
+                            
+                            <!-- Dropdown List -->
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="brandDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Brands
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="brandDropdown">
+                                    <% product.brands.forEach(brand => { %>
+                                        <a class="dropdown-item" href="/brand-detail/<%= brand.brand_id %>">
+                                            <%= brand.brand_name %>
+                                            <% if (brand.details) { %>
+                                                <span class="details">(<%= brand.details %>)</span>
+                                            <% } %>
+                                        </a>
+                                    <% }); %>
+                                </div>
+                            </div>
                         </div>
-    
-                        <!-- Display details for each brand -->
-                        <p class="card-text"><strong>Brands:</strong>
-                            <% product.brands.forEach(brand => { %>
-                                <%= brand.brand_name %>,
-                            <% }); %>
-                        </p>
-    
-                        <!-- Dropdown list for brands -->
-                        <div class="form-group mt-3">
-                            <label for="brandDropdown">Select Brand:</label>
-                            <select class="form-control" id="brandDropdown">
-                                <option value="">All Brands</option>
-                                <% product.brands.forEach(brand => { %>
-                                    <option value="<%= brand.brand_id %>"><%= brand.brand_name %></option>
-                                <% }); %>
-                            </select>
-                        </div>
+                        <!-- ... Rest of your HTML ... -->
                     </div>
                 </div>
             <% }); %>
         <% } else { %>
             <p>No products available.</p>
         <% } %>
-    </div>
     
 
         <!-- Footer Start -->
