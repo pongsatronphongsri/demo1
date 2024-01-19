@@ -311,10 +311,11 @@ app.get('/', function (req, res) {
 
 app.get('/shop', function (req, res) {
     const sqlQuery = `
-        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_details.detail
         FROM products
         LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
-        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id;
+        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+        LEFT JOIN product_details ON products.product_id = product_details.product_id;
     `;
 
     // Assume you fetch categories from the database (replace this with your actual logic)
@@ -333,6 +334,7 @@ app.get('/shop', function (req, res) {
                     acc.push({
                         product_id: result.product_id,
                         model: result.model,
+                        detail: result.detail,
                         brands: [{
                             brand_id: result.brand_id,
                             brand_name: result.brand_name
@@ -349,6 +351,8 @@ app.get('/shop', function (req, res) {
         });
     });
 });
+
+
 
 
 

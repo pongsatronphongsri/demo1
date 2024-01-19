@@ -9719,6 +9719,17 @@ a.text-dark:hover, a.text-dark:focus {
   max-height: calc(100vh - 65px); /* 65px คือความสูงของ Navbar */
 }
 
+/* Add this style for truncating text */
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
+  -webkit-line-clamp: 3; /* Adjust the number of lines to show as needed */
+  font-size: 14px; /* Adjust the font size as needed */
+  line-height: 1.5; /* Adjust the line height as needed */
+}
 
 
 

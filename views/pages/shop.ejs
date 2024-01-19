@@ -159,19 +159,25 @@
 
     <div class="container mt-4">
         <h1 class="mb-4">Shop</h1>
-
+    
         <% if (products.length > 0) { %>
             <% products.forEach(product => { %>
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title"><%= product.model %></h5>
-                        <p class="card-text">Brands:</p>
-                        <ul class="list-unstyled">
+                        <div class="card-text">
+                            <p class="truncate-text">
+                                <%= product.detail %>
+                            </p>
+                        </div>
+    
+                        <!-- Display details for each brand -->
+                        <p class="card-text"><strong>Brands:</strong>
                             <% product.brands.forEach(brand => { %>
-                                <li><%= brand.brand_name %></li>
+                                <%= brand.brand_name %>,
                             <% }); %>
-                        </ul>
-
+                        </p>
+    
                         <!-- Dropdown list for brands -->
                         <div class="form-group mt-3">
                             <label for="brandDropdown">Select Brand:</label>
@@ -189,6 +195,7 @@
             <p>No products available.</p>
         <% } %>
     </div>
+    
 
         <!-- Footer Start -->
         <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
@@ -255,7 +262,7 @@
         <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
 
-
+        
 
         <!-- JavaScript Libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
