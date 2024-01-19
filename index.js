@@ -96,9 +96,9 @@ app.post('/register', async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const insertQuery = `INSERT INTO users (username, email, password, phone) VALUES (?, ?, ?, ?)`;
+        const insertQuery = `INSERT INTO users (username, email, password, phone, isAdmin) VALUES (?, ?, ?, ?, ?)`;
 
-        connection.query(insertQuery, [username, email, hashedPassword, phone], (err, result) => {
+        connection.query(insertQuery, [username, email, hashedPassword, phone, false], (err, result) => {
             if (err) {
                 console.error('Error registering user:', err);
                 return res.status(500).send(`Error registering user: ${err.message}`);
@@ -111,6 +111,36 @@ app.post('/register', async (req, res) => {
 });
 
 //login
+
+// app.post('/login', (req, res) => {
+//     const { email, password } = req.body;
+//     const selectQuery = `SELECT * FROM users WHERE email = ?`;
+
+//     connection.query(selectQuery, [email], async (err, results) => {
+//         if (err || results.length === 0) {
+//             res.status(401).send('Invalid email or password');
+//             return;
+//         }
+
+//         const user = results[0];
+//         const passwordMatch = await bcrypt.compare(password, user.password);
+
+//         if (!passwordMatch) {
+//             res.status(401).send('Invalid email or password');
+//             return;
+//         }
+
+//         // Store user information in the session after successful login
+//         req.session.user = {
+//             id: user.id,
+//             email: user.email,
+//             username: user.username // If available in your database
+//             // Add other relevant user data to the session if needed
+//         };
+
+//         res.redirect('/');
+//     });
+// });
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
@@ -130,17 +160,48 @@ app.post('/login', (req, res) => {
             return;
         }
 
-        // Store user information in the session after successful login
-        req.session.user = {
-            id: user.id,
-            email: user.email,
-            username: user.username // If available in your database
-            // Add other relevant user data to the session if needed
-        };
+        // Check if the user is an admin
+        if (user.isAdmin) {
+            // Store user information in the session after successful login
+            req.session.user = {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                isAdmin: true // Set the isAdmin flag for admin users
+                // Add other relevant user data to the session if needed
+            };
 
-        res.redirect('/');
+            // Redirect to the admin page
+            res.redirect('/admin');
+        } else {
+            // For non-admin users, store user information in the session and redirect to the home page
+            req.session.user = {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                isAdmin: false // Ensure isAdmin is false for non-admin users
+                // Add other relevant user data to the session if needed
+            };
+
+            res.redirect('/');
+        }
     });
 });
+app.get('/admin', verifyAdmin, (req, res) => {
+    console.log('Admin page route accessed');
+    
+    const username = req.session.user.username;
+    res.render('pages/admin', { username });
+});
+function verifyAdmin(req, res, next) {
+    if (req.session.user && req.session.user.isAdmin) {
+        next();
+    } else {
+        res.status(403).send('Forbidden: Access denied');
+    }
+}
+
+
 //logout
 app.get('/logout', (req, res) => {
     // Destroy the session
@@ -181,38 +242,10 @@ function verifyToken(req, res, next) {
     }
 }
 
-/*app.get('/', function(req, res) {
-    pool.query('SELECT * FROM printer', (err, result) => {
-        if (err) {
-            // หากมีข้อผิดพลาดในการดึงข้อมูล
-            res.render('pages/error', { error: 'Error fetching data' });
-        } else {
-            // หากดึงข้อมูลสำเร็จ ส่งข้อมูลไปยังหน้า index.html
-            res.render('pages/index', { printers: result });
-        }
-    });
-});*/
-// app.get('/', function (req, res) {
-//     pool.query('SELECT * FROM printer', (err, printersResult) => {
-//         if (err) {
-//             // หากมีข้อผิดพลาดในการดึงข้อมูล printer
-//             res.render('pages/error', { error: 'Error fetching printer data' });
-//         } else {
-//             // หากดึงข้อมูล printer สำเร็จ
-//             pool.query('SELECT * FROM category', (err, categoriesResult) => {
-//                 if (err) {
-//                     // หากมีข้อผิดพลาดในการดึงข้อมูล category
-//                     res.render('pages/error', { error: 'Error fetching category data' });
-//                 } else {
-//                     const username = req.session.user ? req.session.user.username : null;
-//                     // หากดึงข้อมูล category สำเร็จ ส่งข้อมูลไปยังหน้า index.html
-//                     res.render('pages/index', { printers: printersResult, categories: categoriesResult,username });
 
-//                 }
-//             });
-//         }
-//     });
-// });
+
+
+
 app.get('/', function (req, res) {
     pool.query('SELECT * FROM printer', (err, printersResult) => {
         if (err) {
@@ -241,11 +274,51 @@ app.get('/', function (req, res) {
     });
 });
 
+//shop
 
+// Assuming you are using Express.js and have a connection pool (pool) established
 
 app.get('/shop', function (req, res) {
-    res.render('pages/shop');
+    const sqlQuery = `
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name
+        FROM products
+        LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id;
+    `;
+
+    pool.query(sqlQuery, (err, results) => {
+        if (err) {
+            return res.render('pages/error', { error: 'Error fetching data' });
+        }
+
+        const products = results.reduce((acc, result) => {
+            const existingProduct = acc.find(p => p.product_id === result.product_id);
+            if (existingProduct) {
+                existingProduct.brands.push({
+                    brand_id: result.brand_id,
+                    brand_name: result.brand_name
+                });
+            } else {
+                acc.push({
+                    product_id: result.product_id,
+                    model: result.model,
+                    brands: [{
+                        brand_id: result.brand_id,
+                        brand_name: result.brand_name
+                    }]
+                });
+            }
+            return acc;
+        }, []);
+
+        res.render('pages/shop', { products });
+    });
 });
+
+
+
+
+
 app.get('/checkout', function (req, res) {
     res.render('pages/checkout');
 });
