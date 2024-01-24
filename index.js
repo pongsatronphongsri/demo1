@@ -5,6 +5,7 @@ const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const path = require('path');
 var app = express();
 
 app.use(session({
@@ -15,6 +16,7 @@ app.use(session({
 }));
 
 app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(8080);
@@ -189,7 +191,7 @@ app.post('/login', (req, res) => {
 });
 // app.get('/admin', verifyAdmin, (req, res) => {
 //     console.log('Admin page route accessed');
-    
+
 //     const username = req.session.user.username;
 //     res.render('pages/admin', { username });
 // });
@@ -308,6 +310,90 @@ app.get('/', function (req, res) {
 //shop
 
 // Assuming you are using Express.js and have a connection pool (pool) established
+/*
+app.get('/shop', function (req, res) {
+    const sqlQuery = `
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
+        FROM products
+        LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+        LEFT JOIN product_details ON products.product_id = product_details.product_id;
+    `;
+
+    // Assume you fetch categories from the database (replace this with your actual logic)
+    pool.query('SELECT * FROM categories', (err, categoriesResult) => {
+        const categories = categoriesResult || [];
+
+        pool.query(sqlQuery, (err, results) => {
+            const products = results.reduce((acc, result) => {
+                const existingProduct = acc.find(p => p.product_id === result.product_id);
+                if (existingProduct) {
+                    existingProduct.brands.push({
+                        brand_id: result.brand_id,
+                        brand_name: result.brand_name,
+                        details: result.details
+                    });
+                } else {
+                    acc.push({
+                        product_id: result.product_id,
+                        model: result.model,
+                        product_detail: result.product_detail,
+                        brands: [{
+                            brand_id: result.brand_id,
+                            brand_name: result.brand_name,
+                            details: result.details
+                        }]
+                    });
+                }
+                return acc;
+            }, []);
+
+            // Assume you have the username available in the session (replace this with your actual logic)
+            const username = req.session.user ? req.session.user.username : null;
+
+            res.render('pages/shop', { products, username, categories });
+        });
+    });
+});
+
+
+// Assuming your app is an Express app
+app.get('/brand-detail/:productId', function(req, res) {
+    const productId = req.params.productId;
+
+    // Perform a database query to get brand and product details based on productId
+    const sqlQuery = `
+        SELECT products.product_id, products.model, product_brand_relationship.details AS brand_details, brands.brand_name
+        FROM products
+        JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+        WHERE products.product_id = ?;
+    `;
+
+    pool.query(sqlQuery, [productId], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // Check if any results were returned
+        if (results.length === 0) {
+            return res.status(404).send('Product not found');
+        }
+
+        const productDetails = {
+            product_id: results[0].product_id,
+            model: results[0].model,
+            brand_details: results[0].brand_details,
+            brand_name: results[0].brand_name
+        };
+
+        // Render the brand detail page with the retrieved details
+        res.render('pages/brand-detail', { productDetails });
+    });
+});
+
+*/
 
 app.get('/shop', function (req, res) {
     const sqlQuery = `
@@ -356,31 +442,70 @@ app.get('/shop', function (req, res) {
 
 
 // Assuming your app is an Express app
-app.get('/brand-detail/:brandId', function(req, res) {
-    const brandId = req.params.brandId;
+app.get('/brand-detail/:productId', function (req, res) {
+    const productId = decodeURIComponent(req.params.productId);
 
-    // Perform a database query to get brand and product details based on brandId
-    const sqlQuery = `
-        SELECT products.product_id, products.model, product_brand_relationship.details AS brand_details
-        FROM products
-        JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
-        WHERE product_brand_relationship.brand_id = ?;
-    `;
-
-    pool.query(sqlQuery, [brandId], (err, results) => {
+    // Fetch categories from the database (replace this with your actual logic)
+    pool.query('SELECT * FROM category', (err, categoriesResult) => {
         if (err) {
-            console.error(err);
-            return res.status(500).send('Internal Server Error');
+            // Handle the error appropriately
+            return res.render('pages/error', { error: 'Error fetching category data' });
         }
 
-        const productDetails = results.map(result => ({
-            product_id: result.product_id,
-            model: result.model,
-            brand_details: result.brand_details
-        }));
 
-        // Render the brand detail page with the retrieved details
-        res.render('pages/brand-detail', { productDetails });
+        const categories = categoriesResult || [];
+
+        // Perform a database query to get all brands and their details associated with productId
+        const sqlQuery = `
+        SELECT 
+        products.product_id,
+        products.model,
+        product_brand_relationship.details AS brand_details,
+        product_brand_relationship.picture AS brand_picture,
+        product_brand_relationship.price AS brand_price,
+        brands.brand_id,
+        brands.brand_name
+    FROM
+        products
+            JOIN
+        product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+            JOIN
+        brands ON product_brand_relationship.brand_id = brands.brand_id
+    WHERE
+        products.product_id = ?;
+    
+    
+        `;
+
+        pool.query(sqlQuery, [productId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Check if any results were returned
+            if (results.length === 0) {
+                return res.status(404).send('Product or brand not found');
+            }
+
+            const productDetails = {
+                product_id: results[0].product_id,
+                model: results[0].model,
+                brands: results.map(result => ({
+                    brand_id: result.brand_id,
+                    brand_name: result.brand_name,
+                    brand_details: result.brand_details,
+                    brand_picture: result.brand_picture,
+                    brand_price: result.brand_price
+                }))
+            };
+
+            // Assume you have the username available in the session (replace this with your actual logic)
+            const username = req.session.user ? req.session.user.username : null;
+
+            // Render the brand detail page with the retrieved details, username, and categories
+            res.render('pages/brand_detail', { productDetails, username, categories });
+        });
     });
 });
 
@@ -640,9 +765,9 @@ app.post('/cart', (req, res) => {
             });
         });
     }))
-    .then(() => {
-        // After updating the cart, fetch the updated cart items from the database
-        const getCartItemsQuery = `
+        .then(() => {
+            // After updating the cart, fetch the updated cart items from the database
+            const getCartItemsQuery = `
             SELECT printer.id as productId,
                    printer.name as productName,
                    printer.price,
@@ -652,32 +777,32 @@ app.post('/cart', (req, res) => {
             JOIN printer ON cart.product_id = printer.id
             WHERE cart.user_id = ?`;
 
-        connection.query(getCartItemsQuery, [userId], (err, cartItems) => {
-            if (err) {
-                console.error('Error retrieving updated cart items:', err);
-                return res.status(500).send('Error retrieving updated cart items');
-            }
-
-            // Retrieve the username from the session
-            const username = req.session.user.username || null;
-
-            // Fetch categories from the database
-            const getCategoriesQuery = 'SELECT * FROM category';
-            connection.query(getCategoriesQuery, (err, categories) => {
+            connection.query(getCartItemsQuery, [userId], (err, cartItems) => {
                 if (err) {
-                    console.error('Error fetching categories:', err);
-                    return res.status(500).send('Error fetching categories');
+                    console.error('Error retrieving updated cart items:', err);
+                    return res.status(500).send('Error retrieving updated cart items');
                 }
 
-                // Render the cart template with the updated cartItems, username, and categories data
-                res.render('pages/cart', { cartItems, username, categories });
+                // Retrieve the username from the session
+                const username = req.session.user.username || null;
+
+                // Fetch categories from the database
+                const getCategoriesQuery = 'SELECT * FROM category';
+                connection.query(getCategoriesQuery, (err, categories) => {
+                    if (err) {
+                        console.error('Error fetching categories:', err);
+                        return res.status(500).send('Error fetching categories');
+                    }
+
+                    // Render the cart template with the updated cartItems, username, and categories data
+                    res.render('pages/cart', { cartItems, username, categories });
+                });
             });
+        })
+        .catch(error => {
+            // Handle errors
+            res.status(500).send('Error updating cart');
         });
-    })
-    .catch(error => {
-        // Handle errors
-        res.status(500).send('Error updating cart');
-    });
 });
 
 
