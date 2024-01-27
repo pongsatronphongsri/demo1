@@ -309,91 +309,6 @@ app.get('/', function (req, res) {
 
 //shop
 
-// Assuming you are using Express.js and have a connection pool (pool) established
-/*
-app.get('/shop', function (req, res) {
-    const sqlQuery = `
-        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
-        FROM products
-        LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
-        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
-        LEFT JOIN product_details ON products.product_id = product_details.product_id;
-    `;
-
-    // Assume you fetch categories from the database (replace this with your actual logic)
-    pool.query('SELECT * FROM categories', (err, categoriesResult) => {
-        const categories = categoriesResult || [];
-
-        pool.query(sqlQuery, (err, results) => {
-            const products = results.reduce((acc, result) => {
-                const existingProduct = acc.find(p => p.product_id === result.product_id);
-                if (existingProduct) {
-                    existingProduct.brands.push({
-                        brand_id: result.brand_id,
-                        brand_name: result.brand_name,
-                        details: result.details
-                    });
-                } else {
-                    acc.push({
-                        product_id: result.product_id,
-                        model: result.model,
-                        product_detail: result.product_detail,
-                        brands: [{
-                            brand_id: result.brand_id,
-                            brand_name: result.brand_name,
-                            details: result.details
-                        }]
-                    });
-                }
-                return acc;
-            }, []);
-
-            // Assume you have the username available in the session (replace this with your actual logic)
-            const username = req.session.user ? req.session.user.username : null;
-
-            res.render('pages/shop', { products, username, categories });
-        });
-    });
-});
-
-
-// Assuming your app is an Express app
-app.get('/brand-detail/:productId', function(req, res) {
-    const productId = req.params.productId;
-
-    // Perform a database query to get brand and product details based on productId
-    const sqlQuery = `
-        SELECT products.product_id, products.model, product_brand_relationship.details AS brand_details, brands.brand_name
-        FROM products
-        JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
-        JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
-        WHERE products.product_id = ?;
-    `;
-
-    pool.query(sqlQuery, [productId], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Internal Server Error');
-        }
-
-        // Check if any results were returned
-        if (results.length === 0) {
-            return res.status(404).send('Product not found');
-        }
-
-        const productDetails = {
-            product_id: results[0].product_id,
-            model: results[0].model,
-            brand_details: results[0].brand_details,
-            brand_name: results[0].brand_name
-        };
-
-        // Render the brand detail page with the retrieved details
-        res.render('pages/brand-detail', { productDetails });
-    });
-});
-
-*/
 
 app.get('/shop', function (req, res) {
     const sqlQuery = `
@@ -406,6 +321,9 @@ app.get('/shop', function (req, res) {
 
     // Assume you fetch categories from the database (replace this with your actual logic)
     pool.query('SELECT * FROM categories', (err, categoriesResult) => {
+         
+
+
         const categories = categoriesResult || [];
 
         pool.query(sqlQuery, (err, results) => {
