@@ -378,6 +378,7 @@ app.get('/brand-detail/:productId', function (req, res) {
         SELECT 
         products.product_id,
         products.model,
+        product_brand_relationship.detail_id,
         product_brand_relationship.details AS brand_details,
         product_brand_relationship.picture AS brand_picture,
         product_brand_relationship.price AS brand_price,
@@ -410,6 +411,7 @@ app.get('/brand-detail/:productId', function (req, res) {
                 product_id: results[0].product_id,
                 model: results[0].model,
                 brands: results.map(result => ({
+                    detail_id: result.detail_id, 
                     brand_id: result.brand_id,
                     brand_name: result.brand_name,
                     brand_details: result.brand_details,
@@ -427,6 +429,218 @@ app.get('/brand-detail/:productId', function (req, res) {
     });
 });
 
+//product-detail
+// app.js or your main server file
+
+app.get('/product-detail/:detailId', function (req, res) {
+    const detailId = decodeURIComponent(req.params.detailId);
+    //const detailId = req.params.detailId;
+
+    // ... (your database query logic)
+    const sqlQuery = `
+    SELECT 
+        product_brand_relationship.product_id,
+        product_brand_relationship.brand_id,
+        product_brand_relationship.detail_id,
+        product_brand_relationship.details AS brand_details,
+        product_brand_relationship.picture AS brand_picture,
+        product_brand_relationship.price AS brand_price,
+        product_brand_relationship.text AS brand_text,
+        brands.brand_id AS brand_id,
+        brands.brand_name AS brand_name
+    FROM
+        product_brand_relationship
+            JOIN
+        brands ON product_brand_relationship.brand_id = brands.brand_id
+    WHERE
+        product_brand_relationship.detail_id = ?;
+`;
+
+    pool.query(sqlQuery, [detailId], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // Check if any results were returned
+        if (results.length === 0) {
+            return res.status(404).send('Product or brand not found');
+        }
+
+        const productDetails = {
+            product_id: results[0].product_id,
+            brands: results.map(result => ({
+                brand_id: result.brand_id,
+                brand_name: result.brand_name,
+                brand_details: result.brand_details,
+                brand_picture: result.brand_picture,
+                brand_price: result.brand_price,
+                brand_text: result.brand_text
+            }))
+        };
+
+        // Fetch categories from the database (replace this with your actual logic)
+        pool.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            const categories = categoriesResult || [];
+
+            // Assume you have the username available in the session (replace this with your actual logic)
+            const username = req.session.user ? req.session.user.username : null;
+
+            // Render the product detail page with the retrieved details, username, and categories
+            res.render('pages/product_detail', { detailId,productDetails, username, categories });
+        });
+    });
+});
+
+/*app.post('/add_to_cart', (req, res) => {
+    // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
+    const userId = req.session.user ? req.session.user.id : null;
+
+    const { detailId, quantity } = req.body;
+
+    // Your logic to fetch product details based on the detailId from the database
+    const getProductDetailsQuery = `
+        SELECT details, price
+        FROM product_brand_relationship
+        WHERE detail_id = ?;
+    `;
+
+    pool.query(getProductDetailsQuery, [detailId], (error, result) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        if (result.length === 0) {
+            console.log(`Product not found for detailId: ${detailId}`);
+            return res.status(404).send('Product not found');
+        }
+
+        const { details, price } = result[0]; // Ensure result[0] is defined before destructure
+
+        // Your logic to insert the product into the cart table in the database
+        const insertCartItemQuery = `
+            INSERT INTO product_cart (user_id, detail_id, quantity, price)
+            VALUES (?, ?, ?, ?);
+        `;
+
+        pool.query(insertCartItemQuery, [userId, detailId, quantity, price], (error, result) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Fetch cart items (replace this with your actual logic)
+            pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Render the cart page with the updated cart items
+                res.render('pages/cart_product', { cartItems });
+            });
+        });
+    });
+});*/
+app.post('/add_to_cart', (req, res) => {
+    // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
+    const userId = req.session.user ? req.session.user.id : null;
+
+    const { detailId, quantity } = req.body;
+
+    // Your logic to fetch product details based on the detailId from the database
+    const getProductDetailsQuery = `
+        SELECT details, price, picture
+        FROM product_brand_relationship
+        WHERE detail_id = ?;
+    `;
+
+    pool.query(getProductDetailsQuery, [detailId], (error, result) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        if (result.length === 0) {
+            console.log(`Product not found for detailId: ${detailId}`);
+            return res.status(404).send('Product not found');
+        }
+
+        const { details, price, picture } = result[0]; // Ensure result[0] is defined before destructure
+
+        // Your logic to insert the product into the cart table in the database
+        const insertCartItemQuery = `
+            INSERT INTO product_cart (user_id, detail_id, quantity, price, picture,details)
+            VALUES (?, ?, ?, ?, ?,?);
+        `;
+
+        pool.query(insertCartItemQuery, [userId, detailId, quantity, price, picture,details], (error, result) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Fetch cart items (replace this with your actual logic)
+            pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Render the cart page with the updated cart items
+                res.render('pages/cart_product', { cartItems });
+            });
+        });
+    });
+});
+// Assuming you have your express app defined as 'app'
+
+// Assuming you have an instance of Express called 'app' and a database pool called 'pool'
+app.post('/remove_from_cart', (req, res) => {
+    const { cartId } = req.body;
+
+    // Validate cartId
+    if (!cartId || isNaN(cartId)) {
+        return res.status(400).send('Invalid cartId');
+    }
+
+    // Retrieve userId from the session
+    const userId = req.session.user ? req.session.user.id : null;
+
+    // Your logic to remove the item from the product_cart table in the database
+    const removeCartItemQuery = `
+        DELETE FROM product_cart
+        WHERE cart_id = ? AND user_id = ?;
+    `;
+
+    pool.query(removeCartItemQuery, [cartId, userId], (error, result) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        // Fetch the updated cart items after removal (replace this with your actual logic)
+        pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, updatedCartItems) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Render the cart_product page with the updated cart items
+            res.render('pages/cart_product', { cartItems: updatedCartItems });
+        });
+    });
+});
+
+
+
+// Add more routes and configurations as needed
 
 
 
@@ -446,74 +660,8 @@ app.get('/contact', function (req, res) {
 app.get('/cart', function (req, res) {
     res.render('pages/cart');
 });
-/*
-app.get('/detail', function(req, res) {
-    res.render('pages/detail');
-});*/
-/*
-app.get('/detail', function(req, res) {
-    const productId = req.query.id; // รับค่า ID ของสินค้าจาก URL
-    pool.query('SELECT * FROM printer WHERE id = ?', [productId], (err, result) => {
-        if (err || result.length === 0) {
-            // หากเกิดข้อผิดพลาดหรือไม่พบสินค้า
-            res.render('pages/error', { error: 'Product not found' });
-        } else {
-            // หากดึงข้อมูลสินค้าสำเร็จ
-            const product = result[0];
-            res.render('pages/detail', { product: product });
-        }
-    });
-});*/
 
-// app.get('/detail', function (req, res) {
-//     const productId = req.query.id; // รับค่า ID ของสินค้าจาก URL
 
-//     // Query ข้อมูลสินค้าจากฐานข้อมูล
-//     pool.query('SELECT * FROM printer WHERE id = ?', [productId], (err, productResult) => {
-//         if (err || productResult.length === 0) {
-//             // หากเกิดข้อผิดพลาดหรือไม่พบสินค้า
-//             res.render('pages/error', { error: 'Product not found' });
-//         } else {
-//             // Query ข้อมูล Category จากฐานข้อมูล
-//             pool.query('SELECT * FROM category', (err, categoryResult) => {
-//                 if (err) {
-//                     // หากเกิดข้อผิดพลาดในการดึงข้อมูล Category
-//                     res.render('pages/error', { error: 'Error fetching categories' });
-//                 } else {
-//                     // หากดึงข้อมูล Category สำเร็จ
-//                     const product = productResult[0];
-//                     const categories = categoryResult; // สมมติว่า categoryResult เป็น array ของ categories
-
-//                     res.render('pages/detail', { product: product, categories: categories });
-//                 }
-//             });
-//         }
-//     });
-// });
-// app.get('/detail', function (req, res) {
-//     const productId = req.query.id;
-
-//     // Query product details
-//     pool.query('SELECT * FROM printer WHERE id = ?', [productId], (err, productResult) => {
-//         if (err || productResult.length === 0) {
-//             return res.render('pages/error', { error: 'Product not found' });
-//         }
-
-//         // Query categories
-//         pool.query('SELECT * FROM category', (err, categoryResult) => {
-//             if (err) {
-//                 return res.render('pages/error', { error: 'Error fetching categories' });
-//             }
-
-//             // Render the detail page with product details, categories, and req object
-//             const product = productResult[0];
-//             const categories = categoryResult;
-
-//             res.render('pages/detail', { product: product, categories: categories, req: req });
-//         });
-//     });
-// });
-// Your route handler for the detail page
 // Your route handler for the detail page
 app.get('/detail', function (req, res) {
     const productId = req.query.id;

@@ -162,27 +162,28 @@
             <span class="bg-secondary pr-3">Brand Detail</span>
         </h2>
 
-        <% if (productDetails.brands && productDetails.brands.length> 0) { %>
+        <% if (productDetails.brands && productDetails.brands.length > 0) { %>
             <div class="row px-xl-5">
-                <% productDetails.brands.forEach(brand=> { %>
+                <% productDetails.brands.forEach(brand => { %>
                     <div class="col-md-4 mb-4">
                         <div class="card-body text-center">
                             <img src="<%= brand.brand_picture %>" class="card-img-top mx-auto"
                                 alt="<%= brand.brand_name %>" style="width: 250px; height: 250px;">
-                            
-                            <h6 class="card-subtitle mb-2 text-muted">ยี่ห้อ: <%= brand.brand_name %>
-                            </h6>
-                            <p class="card-text">รุ่น: <%= brand.brand_details %>
-                            </p>
-                            <p class="card-text">ราคา: <%= brand.brand_price %> บาท
-                            </p>
+        
+                            <h6 class="card-subtitle mb-2 text-muted">Brand: <%= brand.brand_name %></h6>
+                            <p class="card-text">Model: <%= brand.brand_details %></p>
+                            <p class="card-text">Price: <%= brand.brand_price %> บาท</p>
+        
+                            <!-- Button to view more details -->
+                            <a href="/product-detail/<%= brand.detail_id %>" class="btn btn-primary">View Brand Details</a>
                         </div>
                     </div>
-                    <% }); %>
+                <% }); %>
             </div>
-            <% } else { %>
-                <p>No brands found for this product.</p>
-                <% } %>
+        <% } else { %>
+            <p>No brands found for this product.</p>
+        <% } %>
+        
     </div>
     
 

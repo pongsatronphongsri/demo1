@@ -1,0 +1,82 @@
+<!-- cart_product.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+</head>
+
+<body>
+    <h1>Your Cart</h1>
+    <% 
+    function calculateTotal(cartItems) {
+            let total = 0;
+            // Iterate through cart items and calculate the total
+            for (const item of cartItems) {
+                total += item.price * item.quantity;
+            }
+            return total;
+        }
+
+     %>
+
+<% if (cartItems.length > 0) { %>
+    <table>
+        <thead>
+            <tr>
+             
+                <th>product</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Picture</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% cartItems.forEach(item => { %>
+                <tr>
+             
+                    <td><%= item.details %></td>
+                    <td><%= item.quantity %></td>
+                    <td><%= item.price.toFixed(2) %> บาท</td>
+                    <td><%= (item.quantity * item.price).toFixed(2) %> บาท</td>
+                    <td><img src="<%= item.picture %>" alt="<%= item.productName %> Image" style="max-width: 50px; height: auto;"></td>
+                    <td>
+                        <!-- Add a form to submit the remove action -->
+                        <form action="/remove_from_cart" method="post">
+                            <input type="hidden" name="cartId" value="<%= item.cart_id %>">
+                            <button type="submit">Remove from Cart</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <p>Total: <%= calculateTotal(cartItems) %> บาท</p>
+    
+    <!-- Add a form to proceed with the checkout, update quantities, etc. -->
+<% } else { %>
+    <p>Your cart is empty.</p>
+<% } %>
+
+    <!-- Add any additional content or functionality as needed -->
+
+    <a href="/">Continue Shopping</a>
+
+    <script>
+        function calculateTotal(cartItems) {
+            let total = 0;
+            // Iterate through cart items and calculate the total
+            for (const item of cartItems) {
+                total += item.price * item.quantity;
+            }
+            return total;
+        }
+    </script>
+</body>
+
+</html>
