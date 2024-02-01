@@ -550,8 +550,12 @@ app.get('/product-detail/:detailId', function (req, res) {
 });*/
 app.post('/add_to_cart', (req, res) => {
     // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
-    const userId = req.session.user ? req.session.user.id : null;
-
+    const username = req.session.user ? req.session.user.username : null;
+    if (!req.session.user) {
+        // If not logged in, redirect to the login page
+        return res.redirect('/login'); // Adjust the login route as needed
+    }
+    const userId = req.session.user.id;
     const { detailId, quantity } = req.body;
 
     // Your logic to fetch product details based on the detailId from the database
@@ -574,11 +578,21 @@ app.post('/add_to_cart', (req, res) => {
 
         const { details, price, picture } = result[0]; // Ensure result[0] is defined before destructure
 
+        pool.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+        
+            const categories = categoriesResult || [];
+
         // Your logic to insert the product into the cart table in the database
         const insertCartItemQuery = `
             INSERT INTO product_cart (user_id, detail_id, quantity, price, picture,details)
             VALUES (?, ?, ?, ?, ?,?);
         `;
+
+        
 
         pool.query(insertCartItemQuery, [userId, detailId, quantity, price, picture,details], (error, result) => {
             if (error) {
@@ -594,12 +608,16 @@ app.post('/add_to_cart', (req, res) => {
                 }
 
                 // Render the cart page with the updated cart items
-                res.render('pages/cart_product', { cartItems });
+                res.render('pages/cart_product', { cartItems, username,categories });
             });
         });
     });
 });
+});
 // Assuming you have your express app defined as 'app'
+
+
+
 
 // Assuming you have an instance of Express called 'app' and a database pool called 'pool'
 app.post('/remove_from_cart', (req, res) => {
@@ -612,6 +630,14 @@ app.post('/remove_from_cart', (req, res) => {
 
     // Retrieve userId from the session
     const userId = req.session.user ? req.session.user.id : null;
+    const username = req.session.user ? req.session.user.username : null;
+    pool.query('SELECT * FROM category', (err, categoriesResult) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const categories = categoriesResult || [];
 
     // Your logic to remove the item from the product_cart table in the database
     const removeCartItemQuery = `
@@ -633,9 +659,10 @@ app.post('/remove_from_cart', (req, res) => {
             }
 
             // Render the cart_product page with the updated cart items
-            res.render('pages/cart_product', { cartItems: updatedCartItems });
+            res.render('pages/cart_product', { cartItems: updatedCartItems,username,categories  });
         });
     });
+});
 });
 
 
@@ -650,8 +677,34 @@ app.post('/remove_from_cart', (req, res) => {
 
 
 app.get('/checkout', function (req, res) {
-    res.render('pages/checkout');
+    // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
+    const userId = req.session.user ? req.session.user.id : null;
+    const username = req.session.user ? req.session.user.username : null;
+
+    // Fetch your categories from the database or any other source
+    pool.query('SELECT * FROM category', (err, categoriesResult) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const categories = categoriesResult || [];
+
+        // Fetch cart items (replace this with your actual logic)
+        pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            res.render('pages/checkout', { username, categories, cartItems });
+        });
+    });
 });
+
+
+
+
 app.get('/contact', function (req, res) {
     res.render('pages/contact');
 });
