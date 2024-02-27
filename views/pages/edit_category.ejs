@@ -1,0 +1,20 @@
+<!-- views/pages/edit_category.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Category</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>เเก้ไขประเภทสินค้า</h1>
+        <form method="POST" action="/admin/edit/category/<%= category.id %>">
+            <div class="form-group">
+                <label for="categoryName">ชื่อประเภทสินค้า:</label>
+                <input type="text" class="form-control" id="categoryName" name="name" value="<%= category.name %>" required>
+            </div>
+            <button type="submit" class="btn btn-primary">กดบันทึกเพื่อเปลี่ยน</button>
+        </form>
+    </div>
+</body>
+</html>

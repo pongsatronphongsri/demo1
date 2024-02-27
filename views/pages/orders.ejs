@@ -1,0 +1,57 @@
+<!-- views/pages/order.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container mt-5">
+      <!-- pages/orders.ejs -->
+<!-- pages/orders.ejs -->
+<h1>Orders</h1>
+<table>
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Detail ID</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Picture</th>
+            <th>Details</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% results.forEach(order => { %>
+            <tr>
+                <td><%= order.user_id %></td>
+                <td><%= order.detail_id %></td>
+                <td><%= order.quantity %></td>
+                <td><%= order.price %></td>
+                <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
+                <td><%= order.details %></td>
+                <td>
+                   
+                </td>
+                <a href="/admin/customers">Customers</a>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
+
+
+
+
+
+    </div>
+</body>
+
+</html>

@@ -177,6 +177,7 @@
                         <th scope="col">ราคา</th>
                         <th scope="col">ราคารวม/ชิ้น</th>
                         <th scope="col">รูปภาพ</th>
+                        <th scope="col">เเก้ไขสินค้า</th>
                         <th scope="col">ลบสินค้า</th>
                     </tr>
                 </thead>
@@ -188,6 +189,17 @@
                             <td><%= item.price.toFixed(2) %> บาท</td>
                             <td><%= (item.quantity * item.price).toFixed(2) %> บาท</td>
                             <td><img src="<%= item.picture %>" alt="<%= item.productName %>" style="max-width: 50px; height: auto;"></td>
+                            <td>
+                                <form action="/update_cart_quantity" method="post" class="d-inline">
+                                    <input type="hidden" name="cartId" value="<%= item.cart_id %>">
+                                    <div class="input-group">
+                                        <input type="number" name="quantity" value="<%= item.quantity %>" class="form-control" min="1">
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary btn-sm">แก้ไข</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
                             <td>
                                 <!-- Add a form to submit the remove action with a Bootstrap button -->
                                 <form action="/remove_from_cart" method="post" class="d-inline">
@@ -201,7 +213,8 @@
             </table>
     
             <p class="font-weight-bold">ราคารวมทั้งสิ้น: <%= calculateTotal(cartItems) %> บาท</p>
-            <a href="/checkout" class="btn btn-success">ชำระเงิน</a>
+            <a  href="/checkout" class="btn btn-success">ชำระเงิน</a>
+            
     
             <!-- Add a form to proceed with the checkout, update quantities, etc. -->
     

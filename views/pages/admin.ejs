@@ -4,6 +4,29 @@
 <head>
     <meta charset="utf-8">
     <title>GiantShop</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0 auto; /* Center the table horizontally */
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        /* Add padding to the cells */
+        th, td {
+            padding: 8px 12px;
+        }
+        /* Add margin to the table */
+        table {
+            margin-bottom: 20px;
+        }
+    </style>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
@@ -37,7 +60,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -159,10 +182,88 @@
     </div>
     <!-- Navbar End -->
 
-   
-        <h1>Welcome to Admin</h1>
-        
+    <div class="container">
+       
 
+        <h2>ข้อมูลประเภทสินค้า</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ชื่อ</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(category => { %>
+                    <tr>
+                        <td><%= category.name %></td>
+                        <td>
+                            <a href="/admin/edit/category/<%= category.id %>" class="btn btn-sm btn-primary">เเก้ไข</a>
+
+                            <a href="/admin/delete/category/<%= category.id %>" class="btn btn-sm btn-danger">ลบ</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <a href="/admin/add" class="btn btn-primary">เพิ่มข้อมูลประเภทสินค้า</a>
+
+
+
+        <h2>ข้อมูลสินค้า</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>ID</th>
+                    <th>Detail_ID</th>
+                    <th>Details</th>
+                    <th>Picture</th>
+                    <th>Price</th>
+                    <th>Text</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% relationships.forEach(relationship => { %>
+                    <tr>
+                        <td><%= relationship.product_id %></td>
+                        <td><%= relationship.brand_id %></td>
+                        <td><%= relationship.detail_id %></td>
+                        <td><%= relationship.details %></td>
+                        <td style="width: 100px; height: 100px;">
+                            <img src="<%= relationship.picture %>" alt="Product Picture" style="max-width: 100%; max-height: 100%;">
+                        </td>
+                        
+                        <td><%= relationship.price %></td>
+                        <td><%= relationship.text %></td>
+                        <td>
+                            <!-- Edit link for product_brand_relationship -->
+
+
+
+
+                            <a href="/admin/edit?action=edit&table=product_brand_relationship&detail_id=<%= relationship.detail_id %>" class="btn btn-sm btn-primary">เเก้ไข</a>
+
+                          
+                           
+                            <form action="/admin/deleteproduct" method="POST">
+                                <input type="hidden" name="table" value="product_brand_relationship">
+                                <input type="hidden" name="id" value="<%= relationship.product_id %>">
+                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                            </form>
+                            
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <a href="/admin/addproduct?action=add&table=product_brand_relationship" class="btn btn-primary">เพิ่มข้อมูลสินค้า</a>
+        <br>
+        
+        <a href="/admin/customers">ข้อมูล Orderสินค้า</a>
+
+    </div>
         <!-- Footer Start -->
         <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
             <div class="row px-xl-5 pt-5">

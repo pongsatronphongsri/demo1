@@ -5,7 +5,14 @@ const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const QRCode = require('qrcode')
+const generatePayload = require('promptpay-qr')
+const _ = require('lodash')
+const cors = require('cors')
 const path = require('path');
+const multer = require('multer');
+
+
 var app = express();
 
 app.use(session({
@@ -20,6 +27,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(8080);
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 /*
 app.get('/',function(req,res){
 
@@ -202,7 +211,7 @@ app.post('/login', (req, res) => {
 //         res.status(403).send('Forbidden: Access denied');
 //     }
 // }
-app.get('/admin', verifyAdmin, async (req, res) => {
+/*app.get('/admin', verifyAdmin, async (req, res) => {
     try {
         console.log('Admin page route accessed');
 
@@ -231,6 +240,663 @@ function verifyAdmin(req, res, next) {
         res.status(403).send('Forbidden: Access denied');
     }
 }
+*/
+app.get('/admin', verifyAdmin, async (req, res) => {
+    try {
+        console.log('Admin page route accessed');
+
+        const username = req.session.user.username;
+
+        // Fetch categories from the database
+        connection.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                console.error('Error fetching category:', err);
+                res.status(500).send(`Error fetching category: ${err.message}`);
+                return;
+            }
+
+            // Fetch product-brand relationships from the database
+            connection.query('SELECT * FROM product_brand_relationship', (err, relationshipsResult) => {
+                if (err) {
+                    console.error('Error fetching product-brand relationships:', err);
+                    res.status(500).send(`Error fetching product-brand relationships: ${err.message}`);
+                    return;
+                }
+
+                res.render('pages/admin', { 
+                    username, 
+                    categories: categoriesResult, 
+                    relationships: relationshipsResult, 
+                    sessionData: req.session 
+                });
+            });
+        });
+    } catch (error) {
+        console.error('Error accessing admin page:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+function verifyAdmin(req, res, next) {
+    if (req.session.user && req.session.user.isAdmin) {
+        next();
+    } else {
+        res.status(403).send('Forbidden: Access denied');
+    }
+}
+
+app.get('/admin/edit/category/:id', verifyAdmin, (req, res) => {
+    const categoryId = req.params.id;
+
+    // Fetch the category data from the database
+    connection.query('SELECT * FROM category WHERE id = ?', [categoryId], (err, categoryResult) => {
+        if (err) {
+            console.error('Error fetching category:', err);
+            res.status(500).send(`Error fetching category: ${err.message}`);
+            return;
+        }
+
+        if (categoryResult.length === 0) {
+            res.status(404).send('Category not found');
+            return;
+        }
+
+        res.render('pages/edit_category', { category: categoryResult[0] });
+    });
+});
+
+//
+app.post('/admin/edit/category/:id', verifyAdmin, (req, res) => {
+    const categoryId = req.params.id;
+    const { name } = req.body;
+
+    if (!name) {
+        res.status(400).send('Category name is required');
+        return;
+    }
+
+    // Update the category in the database
+    connection.query('UPDATE category SET name = ? WHERE id = ?', [name, categoryId], (err, result) => {
+        if (err) {
+            console.error('Error updating category:', err);
+            res.status(500).send(`Error updating category: ${err.message}`);
+            return;
+        }
+        console.log('Category updated successfully');
+        res.redirect('/admin');
+    });
+});
+
+
+
+app.get('/admin/add', verifyAdmin, (req, res) => {
+    res.render('pages/add_category', { errorMessage: null });
+});
+
+app.post('/admin/add', verifyAdmin, (req, res) => {
+    const { name } = req.body;
+
+    if (!name) {
+        res.render('add_category', { errorMessage: 'Category name is required' });
+        return;
+    }
+
+    // Add the category to the database
+    connection.query('INSERT INTO category (name) VALUES (?)', [name], (err, result) => {
+        if (err) {
+            console.error('Error adding category:', err);
+            res.status(500).send('Error adding category');
+            return;
+        }
+        console.log('Category added successfully');
+        res.redirect('/admin'); // Redirect to the admin page after adding the category
+    });
+});
+
+
+//delete category
+app.get('/admin/delete/category/:id', verifyAdmin, (req, res) => {
+    const categoryId = req.params.id;
+
+    // Delete the category from the database
+    connection.query('DELETE FROM category WHERE id = ?', [categoryId], (err, result) => {
+        if (err) {
+            console.error('Error deleting category:', err);
+            res.status(500).send(`Error deleting category: ${err.message}`);
+            return;
+        }
+        console.log('Category deleted successfully');
+        res.redirect('/admin');
+    });
+});
+
+/////product
+/*
+app.get('/admin/edit', verifyAdmin, async (req, res) => {
+ 
+    try {
+       
+        // Fetch data for editing (e.g., product_brand_relationship) from the database
+        // For example:
+        connection.query('SELECT * FROM product_brand_relationship', (err, relationshipsResult) => {
+            if (err) {
+                console.error('Error fetching product-brand relationships:', err);
+                res.status(500).send(`Error fetching product-brand relationships: ${err.message}`);
+                return;
+            }
+
+            // Render the edit page with the fetched data
+            res.render('pages/edit', { relationships: relationshipsResult });
+        });
+    } catch (error) {
+        console.error('Error accessing edit page:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+*/
+
+
+
+app.get('/admin/edit', verifyAdmin, async (req, res) => {
+    const detailId = req.query.detail_id;
+    
+    try {
+        // Fetch data for editing (e.g., product_brand_relationship) from the database based on the detail_id
+        connection.query('SELECT * FROM product_brand_relationship WHERE detail_id = ?', [detailId], (err, relationshipsResult) => {
+            if (err) {
+                console.error('Error fetching product-brand relationship:', err);
+                res.status(500).send(`Error fetching product-brand relationship: ${err.message}`);
+                return;
+            }
+
+            // Render the edit page with the fetched data
+            res.render('pages/edit', { relationships: relationshipsResult });
+        });
+    } catch (error) {
+        console.error('Error accessing edit page:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+//editproduct
+
+app.post('/admin/edit', verifyAdmin, (req, res) => {
+    const { product_id, brand_id, detail_id, details, picture, price, text } = req.body;
+     // Check if product_id is not null
+     if (!product_id) {
+        console.error('Error: product_id cannot be null');
+        res.status(400).send('Error: product_id cannot be null');
+        return;
+    }
+
+    // Check if the record exists
+    connection.query(
+        'SELECT * FROM product_brand_relationship WHERE product_id = ? AND brand_id = ?',
+        [product_id, brand_id],
+        (err, result) => {
+            if (err) {
+                console.error('Error checking if record exists:', err);
+                res.status(500).send('Error checking if record exists');
+                return;
+            }
+
+            if (result.length === 0) {
+                // Record does not exist, insert a new one
+                connection.query(
+                    'INSERT INTO product_brand_relationship (product_id, brand_id, detail_id, details, picture, price, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    [product_id, brand_id, detail_id, details, '/img/' + picture, price, text],
+                    (err, result) => {
+                        if (err) {
+                            console.error('Error adding product-brand relationship:', err);
+                            res.status(500).send('Error adding product-brand relationship');
+                            return;
+                        }
+                        console.log('Product-brand relationship added successfully');
+                        res.redirect('/admin');
+                    }
+                );
+            } else {
+                // Record exists, update it
+                connection.query(
+                    'UPDATE product_brand_relationship SET detail_id = ?, details = ?, picture = ?, price = ?, text = ? WHERE product_id = ? AND brand_id = ?',
+                    [detail_id, details,'/img/' + picture, price, text, product_id, brand_id],
+                    (err, result) => {
+                        if (err) {
+                            console.error('Error updating product-brand relationship:', err);
+                            res.status(500).send('Error updating product-brand relationship');
+                            return;
+                        }
+                        console.log('Product-brand relationship updated successfully');
+                        res.redirect('/admin');
+                    }
+                );
+            }
+        }
+     
+    );
+
+});
+
+/*
+//add product
+app.get('/admin/addproduct', verifyAdmin, (req, res) => {
+    // You can customize this route based on your needs
+    res.render('pages/addproduct'); // Assuming you have a view named 'add' for the form
+});
+
+// Handle form submission for adding a new product-brand relationship
+app.post('/admin/addproduct', verifyAdmin, (req, res) => {
+    const { product_id, brand_id, detail_id, details, price, text, picture } = req.body;
+    if (!product_id) {
+        console.error('Error: product_id cannot be null or empty');
+        res.status(400).send('Error: product_id cannot be null or empty');
+        return;
+    }
+    // Validate form data (e.g., check if required fields are present)
+
+    // Insert the new product-brand relationship into the database
+    connection.query(
+        'INSERT INTO product_brand_relationship (product_id, brand_id, detail_id, details, picture, price, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [product_id, brand_id, detail_id, details, picture, price, text],
+        (err, result) => {
+            if (err) {
+                console.error('Error adding product-brand relationship:', err);
+                res.status(500).send('Error adding product-brand relationship');
+                return;
+            }
+            console.log('Product-brand relationship added successfully');
+            res.redirect('/admin');
+        }
+    );
+});
+*/
+/*
+app.get('/admin/addproduct', verifyAdmin, (req, res) => {
+    // Fetch brands data from the database
+    connection.query('SELECT * FROM brands', (err, brands) => {
+        if (err) {
+            console.error('Error fetching brands:', err);
+            res.status(500).send('Error fetching brands');
+            return;
+        }
+
+        // Fetch product_ids data from the database
+        connection.query('SELECT product_id FROM products', (err, products) => {
+            if (err) {
+                console.error('Error fetching products:', err);
+                res.status(500).send('Error fetching products');
+                return;
+            }
+        
+            // Render the addproduct page with the fetched brands and products data
+            res.render('pages/addproduct', { brands: brands, products: products });
+        });
+    });
+});
+
+// Handle form submission for adding a new product-brand relationship
+// Handle form submission for adding a new product-brand relationship
+app.post('/admin/addproduct', verifyAdmin, (req, res) => {
+    const { model, category_id, brand_id } = req.body;
+
+    // Validate form data
+    if (!model.trim() || !category_id.trim() || !brand_id.trim()) {
+        console.error('Error: Model, category_id, and brand_id cannot be null or empty');
+        res.status(400).send('Error: Model, category_id, and brand_id cannot be null or empty');
+        return;
+    }
+
+    // Insert the new product into the database
+    connection.query(
+        'INSERT INTO products (model, category_id, brand_id) VALUES (?, ?, ?)',
+        [model, category_id, brand_id],
+        (err, result) => {
+            if (err) {
+                console.error('Error adding product:', err);
+                res.status(500).send('Error adding product');
+                return;
+            }
+            console.log('Product added successfully');
+            res.redirect('/admin');
+        }
+    );
+});
+
+*/
+app.get('/admin/addproduct', (req, res) => {
+    connection.query('SELECT brand_id, brand_name FROM brands', (err, brands) => {
+        if (err) {
+            console.error('Error fetching brands:', err);
+            res.status(500).send('Error fetching brands');
+            return;
+        }
+        connection.query('SELECT product_id, model FROM products', (err, products) => {
+            if (err) {
+                console.error('Error fetching products:', err);
+                res.status(500).send('Error fetching products');
+                return;
+            }
+            res.render('pages/addproduct', { brands, products });
+        });
+    });
+});
+
+
+
+
+
+//editproduct
+/*
+app.post('/admin/addproduct', verifyAdmin, (req, res) => {
+    console.log(req.body); // Check the data sent in the form
+    const { brand_id, detail_id, details, picture, price, text } = req.body;
+
+    
+    
+
+    // Insert a new product-brand relationship into the database
+    connection.query(
+        'INSERT INTO product_brand_relationship (product_id, brand_id, detail_id, details, picture, price, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [product_id, brand_id, detail_id, details, '/img/' + picture, price, text],
+        (err, result) => {
+            if (err) {
+                console.error('Error adding product-brand relationship:', err);
+                res.status(500).send('Error adding product-brand relationship');
+                return;
+            }
+            console.log('Product-brand relationship added successfully');
+            res.redirect('/admin');
+        }
+    );
+});
+
+*/
+app.post('/admin/addproduct', verifyAdmin, (req, res) => {
+    console.log(req.body); // Check the data sent in the form
+    const { product_id, brand_id, detail_id, details, picture, price, text } = req.body;
+
+    // Insert a new product-brand relationship into the database
+    connection.query(
+        'INSERT INTO product_brand_relationship (product_id, brand_id, detail_id, details, picture, price, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [product_id, brand_id, detail_id, details, '/img/' + picture, price, text],
+        (err, result) => {
+            if (err) {
+                console.error('Error adding product-brand relationship:', err);
+                res.status(500).send('Error adding product-brand relationship');
+                return;
+            }
+            console.log('Product-brand relationship added successfully');
+            res.redirect('/admin');
+        }
+    );
+});
+
+//delete product
+// Server-side route to handle product deletion
+app.post('/admin/deleteproduct', verifyAdmin, (req, res) => {
+    const { table, id } = req.body;
+
+    // Delete the record from the specified table
+    connection.query(
+        `DELETE FROM ${table} WHERE product_id = ?`,
+        [id],
+        (err, result) => {
+            if (err) {
+                console.error(`Error deleting record from ${table}:`, err);
+                res.status(500).send(`Error deleting record from ${table}`);
+                return;
+            }
+            console.log(`Record deleted successfully from ${table}`);
+            res.redirect('/admin');
+        }
+    );
+});
+
+//order product
+/*
+app.get('/admin/orders', verifyAdmin, (req, res) => {
+    connection.query(`
+        SELECT
+            pc.cart_id,
+            pc.user_id,
+            pc.detail_id,
+            pc.quantity,
+            pc.price,
+            pc.picture,
+            pc.details,
+            u.username
+        FROM
+            product_cart pc
+        JOIN
+            users u ON pc.user_id = u.id
+        WHERE
+            pc.user_id IS NOT NULL;
+    `, (err, results) => {
+        if (err) {
+            console.error('Error fetching orders:', err);
+            res.status(500).send('Error fetching orders');
+            return;
+        }
+        res.render('pages/orders', { orders: results });
+    });
+});
+
+*/
+
+app.get('/admin/orders', verifyAdmin, (req, res) => {
+    connection.query(`
+        SELECT
+            pc.cart_id,
+            pc.user_id,
+            pc.detail_id,
+            pc.quantity,
+            pc.price,
+            pc.picture,
+            pc.details
+        FROM
+            product_cart pc
+        WHERE
+            pc.user_id IS NOT NULL;
+    `, (err, results) => {
+        if (err) {
+            console.error('Error fetching orders:', err);
+            res.status(500).send('Error fetching orders');
+            return;
+        }
+        res.render('pages/orders', { results: results }); // ตรงนี้ให้ใช้ results: results แทน { orders: results }
+    });
+});
+
+app.get('/admin/customers', (req, res) => {
+    const sql = `
+        SELECT
+            c.CustomerID,
+            c.FirstName,
+            c.LastName,
+            c.Email,
+            c.PhoneNumber,
+            c.AddressLine1,
+            c.District,
+            c.SubDistrict,
+            c.Province,
+            c.PostalCode,
+            c.payment,
+            c.order_id,
+            c.payment_status,
+            c.user_id,
+            pc.cart_id,
+            pc.detail_id,
+            pc.quantity,
+            pc.price,
+            pc.picture,
+            pc.details
+        FROM
+            customers c
+        LEFT JOIN
+            product_cart pc ON c.user_id = pc.user_id;
+    `;
+    connection.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching customers:', err);
+            res.status(500).json({ error: 'Error fetching customers' });
+            return;
+        }
+        res.render('pages/customers', { customers: results });
+    });
+});
+
+
+
+
+
+/*
+app.get('/admin/orders', (req, res) => {
+    const getOrdersQuery = `
+    SELECT pc.*, u.username AS customer_username
+    FROM product_cart pc
+    JOIN orders o ON pc.order_id = o.order_id
+    JOIN users u ON o.user_id = u.id;
+`;
+
+    pool.query(getOrdersQuery, (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const orders = results || [];
+        res.render('pages/orders', { orders });
+    });
+});
+
+*/
+
+
+
+
+
+
+// Set storage engine
+/*
+const storage2 = multer.diskStorage({
+    destination: 'public/img/',
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Init upload
+const uploadfile = multer({
+    storage: storage2,
+    limits: { fileSize: 1000000 }, // 1MB
+    fileFilter: function (req, file, cb) {
+        checkFileType(file, cb);
+    }
+}).single('picture');
+
+// Check file type
+function checkFileType(file, cb) {
+    // Allowed extensions
+    const filetypes = /jpeg|jpg|png|gif/;
+    // Check ext
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb('Error: Images only!');
+    }
+}
+
+// Edit product page
+
+app.get('/admin/edit', verifyAdmin, async (req, res) => {
+    const detailId = req.query.detail_id;
+
+    try {
+        // Fetch data for editing (e.g., product_brand_relationship) from the database based on the detail_id
+        connection.query('SELECT * FROM product_brand_relationship WHERE detail_id = ?', [detailId], (err, relationshipsResult) => {
+            if (err) {
+                console.error('Error fetching product-brand relationship:', err);
+                res.status(500).send(`Error fetching product-brand relationship: ${err.message}`);
+                return;
+            }
+
+            // Render the edit page with the fetched data
+            res.render('pages/edit', { relationships: relationshipsResult, imagePath: 'public/img/' });
+        });
+    } catch (error) {
+        console.error('Error accessing edit page:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+// Update product
+app.post('/admin/edit', verifyAdmin, (req, res) => {
+    uploadfile(req, res, (err) => {
+        if (err) {
+            console.error('Error uploading file:', err);
+            res.status(500).send('Error uploading file');
+            return;
+        }
+
+        const { product_id, brand_id, detail_id, details, price, text } = req.body;
+        const picture = req.file ? req.file.filename : null;
+
+        // Check if the record exists
+        connection.query(
+            'SELECT * FROM product_brand_relationship WHERE product_id = ? AND brand_id = ?',
+            [product_id, brand_id],
+            (err, result) => {
+                if (err) {
+                    console.error('Error checking if record exists:', err);
+                    res.status(500).send('Error checking if record exists');
+                    return;
+                }
+
+                if (result.length === 0) {
+                    // Record does not exist, insert a new one
+                    connection.query(
+                        'INSERT INTO product_brand_relationship (product_id, brand_id, detail_id, details, picture, price, text) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [product_id, brand_id, detail_id, details, picture, price, text],
+                        (err, result) => {
+                            if (err) {
+                                console.error('Error adding product-brand relationship:', err);
+                                res.status(500).send('Error adding product-brand relationship');
+                                return;
+                            }
+                            console.log('Product-brand relationship added successfully');
+                            res.redirect('/admin');
+                        }
+                    );
+                } else {
+                    // Record exists, update it
+                    connection.query(
+                        'UPDATE product_brand_relationship SET detail_id = ?, details = ?, picture = ?, price = ?, text = ? WHERE product_id = ? AND brand_id = ?',
+                        [detail_id, details, picture, price, text, product_id, brand_id],
+                        (err, result) => {
+                            if (err) {
+                                console.error('Error updating product-brand relationship:', err);
+                                res.status(500).send('Error updating product-brand relationship');
+                                return;
+                            }
+                            console.log('Product-brand relationship updated successfully');
+                            res.redirect('/admin');
+                        }
+                    );
+                }
+            }
+        );
+    });
+});
+
+*/
 
 
 
@@ -278,7 +944,7 @@ function verifyToken(req, res, next) {
 
 
 
-
+/*
 app.get('/', function (req, res) {
     pool.query('SELECT * FROM printer', (err, printersResult) => {
         if (err) {
@@ -306,10 +972,126 @@ app.get('/', function (req, res) {
         });
     });
 });
+*/
+
+//test
+/*app.get('/', function (req, res) {
+    pool.query('SELECT * FROM printer', (err, printersResult) => {
+        if (err) {
+            // Handle the error appropriately
+            return res.render('pages/error', { error: 'Error fetching printer data' });
+        }
+
+        pool.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                // Handle the error appropriately
+                return res.render('pages/error', { error: 'Error fetching category data' });
+            }
+
+            // Retrieve the username from the session
+            const username = req.session.user ? req.session.user.username : null;
+            const sessionData = req.session;
+            
+            // Check if a category ID was provided in the query string
+            const categoryId = req.query.category;
+
+            // If a category ID was provided, fetch products for that category
+            if (categoryId) {
+                pool.query('SELECT * FROM products WHERE category_id = ?', [categoryId], (err, productsResult) => {
+                    if (err) {
+                        // Handle the error appropriately
+                        return res.render('pages/error', { error: 'Error fetching products for the selected category' });
+                    }
+
+                    // Pass cartItems, printersResult, categoriesResult, productsResult, and username to the index template
+                    res.render('pages/index', {
+                        cartItems: [], // Provide an empty array if no items in the cart
+                        printers: printersResult,
+                        categories: categoriesResult,
+                        products: productsResult,
+                        selectedCategory: categoryId,
+                        username,
+                        sessionData
+                    });
+                });
+            } else {
+                // Pass cartItems, printersResult, categoriesResult, and username to the index template
+                res.render('pages/index', {
+                    cartItems: [], // Provide an empty array if no items in the cart
+                    printers: printersResult,
+                    categories: categoriesResult,
+                    username,
+                    sessionData
+                });
+            }
+        });
+    });
+});*/
+app.get('/', function (req, res) {
+    pool.query('SELECT * FROM printer', (err, printersResult) => {
+        if (err) {
+            // Handle the error appropriately
+            return res.render('pages/error', { error: 'Error fetching printer data' });
+        }
+
+        pool.query('SELECT * FROM category', (err, categoriesResult) => {
+            if (err) {
+                // Handle the error appropriately
+                return res.render('pages/error', { error: 'Error fetching category data' });
+            }
+
+            // Retrieve the username from the session
+            const username = req.session.user ? req.session.user.username : null;
+            const sessionData = req.session;
+            
+            // Check if a category ID was provided in the query string
+            const categoryId = req.query.category;
+
+            // If a category ID was provided, fetch products for that category
+            if (categoryId) {
+                let sqlQuery = `
+                    SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
+                    FROM products
+                    LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+                    LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+                    LEFT JOIN product_details ON products.product_id = product_details.product_id
+                    WHERE products.category_id = ?
+                `;
+
+                pool.query(sqlQuery, [categoryId], (err, productsResult) => {
+                    if (err) {
+                        // Handle the error appropriately
+                        return res.render('pages/error', { error: 'Error fetching products for the selected category' });
+                    }
+
+                    // Pass cartItems, categoriesResult, productsResult, and username to the shopview template
+                    res.render('pages/shop', {
+                        cartItems: [], // Provide an empty array if no items in the cart
+                        categories: categoriesResult,
+                        products: productsResult,
+                        selectedCategory: categoryId,
+                        username,
+                        sessionData
+                    });
+                });
+            } else {
+                // Pass cartItems, printersResult, categoriesResult, and username to the index template
+                res.render('pages/index', {
+                    cartItems: [], // Provide an empty array if no items in the cart
+                    printers: printersResult,
+                    categories: categoriesResult,
+                    username,
+                    sessionData
+                });
+            }
+        });
+    });
+});
+
 
 //shop
 
-
+/*
 app.get('/shop', function (req, res) {
     const sqlQuery = `
         SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
@@ -321,7 +1103,7 @@ app.get('/shop', function (req, res) {
 
     // Assume you fetch categories from the database (replace this with your actual logic)
     pool.query('SELECT * FROM categories', (err, categoriesResult) => {
-         
+
 
 
         const categories = categoriesResult || [];
@@ -357,6 +1139,68 @@ app.get('/shop', function (req, res) {
         });
     });
 });
+*/
+//test shop
+app.get('/shop', function (req, res) {
+    let sqlQuery = `
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
+        FROM products
+        LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+        LEFT JOIN product_details ON products.product_id = product_details.product_id
+    `;
+
+    const selectedCategory = req.query.category;
+
+    if (selectedCategory) {
+        sqlQuery += ` WHERE products.category_id = ${selectedCategory}`;
+    }
+
+    // Assume you fetch categories from the database (replace this with your actual logic)
+    pool.query('SELECT * FROM categories', (err, categoriesResult) => {
+        const categories = categoriesResult || [];
+
+        pool.query(sqlQuery, (err, results) => {
+            if (err) {
+                // Handle the error appropriately
+                return res.render('pages/error', { error: 'Error fetching products data' });
+            }
+
+            const products = results.reduce((acc, result) => {
+                const existingProduct = acc.find(p => p.product_id === result.product_id);
+                if (existingProduct) {
+                    existingProduct.brands.push({
+                        brand_id: result.brand_id,
+                        brand_name: result.brand_name,
+                        details: result.details
+                    });
+                } else {
+                    acc.push({
+                        product_id: result.product_id,
+                        model: result.model,
+                        product_detail: result.product_detail,
+                        brands: [{
+                            brand_id: result.brand_id,
+                            brand_name: result.brand_name,
+                            details: result.details
+                        }]
+                    });
+                }
+                return acc;
+            }, []);
+
+            // Assume you have the username available in the session (replace this with your actual logic)
+            const username = req.session.user ? req.session.user.username : null;
+
+            res.render('pages/shop', { products, username, categories, selectedCategory });
+        });
+    });
+});
+
+/////
+
+
+
 
 
 // Assuming your app is an Express app
@@ -411,7 +1255,7 @@ app.get('/brand-detail/:productId', function (req, res) {
                 product_id: results[0].product_id,
                 model: results[0].model,
                 brands: results.map(result => ({
-                    detail_id: result.detail_id, 
+                    detail_id: result.detail_id,
                     brand_id: result.brand_id,
                     brand_name: result.brand_name,
                     brand_details: result.brand_details,
@@ -492,62 +1336,11 @@ app.get('/product-detail/:detailId', function (req, res) {
             const username = req.session.user ? req.session.user.username : null;
 
             // Render the product detail page with the retrieved details, username, and categories
-            res.render('pages/product_detail', { detailId,productDetails, username, categories });
+            res.render('pages/product_detail', { detailId, productDetails, username, categories });
         });
     });
 });
 
-/*app.post('/add_to_cart', (req, res) => {
-    // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
-    const userId = req.session.user ? req.session.user.id : null;
-
-    const { detailId, quantity } = req.body;
-
-    // Your logic to fetch product details based on the detailId from the database
-    const getProductDetailsQuery = `
-        SELECT details, price
-        FROM product_brand_relationship
-        WHERE detail_id = ?;
-    `;
-
-    pool.query(getProductDetailsQuery, [detailId], (error, result) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).send('Internal Server Error');
-        }
-
-        if (result.length === 0) {
-            console.log(`Product not found for detailId: ${detailId}`);
-            return res.status(404).send('Product not found');
-        }
-
-        const { details, price } = result[0]; // Ensure result[0] is defined before destructure
-
-        // Your logic to insert the product into the cart table in the database
-        const insertCartItemQuery = `
-            INSERT INTO product_cart (user_id, detail_id, quantity, price)
-            VALUES (?, ?, ?, ?);
-        `;
-
-        pool.query(insertCartItemQuery, [userId, detailId, quantity, price], (error, result) => {
-            if (error) {
-                console.error(error);
-                return res.status(500).send('Internal Server Error');
-            }
-
-            // Fetch cart items (replace this with your actual logic)
-            pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
-                if (error) {
-                    console.error(error);
-                    return res.status(500).send('Internal Server Error');
-                }
-
-                // Render the cart page with the updated cart items
-                res.render('pages/cart_product', { cartItems });
-            });
-        });
-    });
-});*/
 app.post('/add_to_cart', (req, res) => {
     // Assuming you have a user ID associated with the session (replace with your actual user authentication logic)
     const username = req.session.user ? req.session.user.username : null;
@@ -583,24 +1376,156 @@ app.post('/add_to_cart', (req, res) => {
                 console.error(err);
                 return res.status(500).send('Internal Server Error');
             }
-        
+
             const categories = categoriesResult || [];
 
-        // Your logic to insert the product into the cart table in the database
-        const insertCartItemQuery = `
+            // Your logic to insert the product into the cart table in the database
+            const insertCartItemQuery = `
             INSERT INTO product_cart (user_id, detail_id, quantity, price, picture,details)
             VALUES (?, ?, ?, ?, ?,?);
         `;
 
-        
 
-        pool.query(insertCartItemQuery, [userId, detailId, quantity, price, picture,details], (error, result) => {
+
+            pool.query(insertCartItemQuery, [userId, detailId, quantity, price, picture, details], (error, result) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Fetch cart items (replace this with your actual logic)
+                pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+                    if (error) {
+                        console.error(error);
+                        return res.status(500).send('Internal Server Error');
+                    }
+
+                    // Render the cart page with the updated cart items
+                    res.render('pages/cart_product', { cartItems, username, categories });
+                });
+            });
+        });
+    });
+});
+
+//test
+/*
+app.post('/add_to_cart', (req, res) => {
+    const username = req.session.user ? req.session.user.username : null;
+    if (!req.session.user) {
+        return res.redirect('/login');
+    }
+    const userId = req.session.user.id;
+    const { detailId, quantity } = req.body;
+
+    const getProductDetailsQuery = `
+        SELECT details, price, picture
+        FROM product_brand_relationship
+        WHERE detail_id = ?;
+    `;
+
+    pool.query(getProductDetailsQuery, [detailId], (error, result) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        if (result.length === 0) {
+            console.log(`Product not found for detailId: ${detailId}`);
+            return res.status(404).send('Product not found');
+        }
+
+        const { details, price, picture } = result[0];
+
+        const insertOrderQuery = `
+            INSERT INTO orders (user_id, total_price, customer_id, payment_status, picture, quantity, details)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        `;
+        const customer_id = userId;
+        const payment_status = 'pending';
+        const total_price = price * quantity;
+
+        pool.query(insertOrderQuery, [userId, total_price, customer_id, payment_status, picture, quantity, details], (error, result) => {
             if (error) {
                 console.error(error);
                 return res.status(500).send('Internal Server Error');
             }
 
-            // Fetch cart items (replace this with your actual logic)
+            const orderId = result.insertId;
+
+            const insertCartItemQuery = `
+                INSERT INTO product_cart (user_id, detail_id, quantity, price, picture, details, order_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
+            `;
+
+            pool.query(insertCartItemQuery, [userId, detailId, quantity, price, picture, details, orderId], (error, result) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Fetch categories (replace this with your actual logic)
+                pool.query('SELECT * FROM category', (err, categoriesResult) => {
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).send('Internal Server Error');
+                    }
+
+                    const categories = categoriesResult || [];
+
+                    pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+                        if (error) {
+                            console.error(error);
+                            return res.status(500).send('Internal Server Error');
+                        }
+
+                        res.render('pages/cart_product', { cartItems, username, categories });
+                    });
+                });
+            });
+        });
+    });
+});
+*/
+
+
+
+
+// Assuming you have your express app defined as 'app'
+//update
+
+app.post('/update_cart_quantity', (req, res) => {
+    const userId = req.session.user ? req.session.user.id : null;
+    const username = req.session.user ? req.session.user.username : null;
+    pool.query('SELECT * FROM category', (err, categoriesResult) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const categories = categoriesResult || [];
+        if (!userId) {
+            // If not logged in, redirect to the login page
+            return res.redirect('/login'); // Adjust the login route as needed
+        }
+
+        const cartId = req.body.cartId;
+        const newQuantity = parseInt(req.body.quantity, 10);
+
+        // Your logic to update the cart quantity in the database
+        const updateCartQuantityQuery = `
+        UPDATE product_cart
+        SET quantity = ?
+        WHERE user_id = ? AND cart_id = ?;
+    `;
+
+        pool.query(updateCartQuantityQuery, [newQuantity, userId, cartId], (error, result) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Fetch updated cart items (replace this with your actual logic)
             pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
                 if (error) {
                     console.error(error);
@@ -608,18 +1533,78 @@ app.post('/add_to_cart', (req, res) => {
                 }
 
                 // Render the cart page with the updated cart items
-                res.render('pages/cart_product', { cartItems, username,categories });
+                res.render('pages/cart_product', { cartItems, username, categories });
             });
         });
     });
 });
-});
-// Assuming you have your express app defined as 'app'
 
+/*
+app.post('/update_cart_quantity', (req, res) => {
+    const userId = req.session.user ? req.session.user.id : null;
+    const username = req.session.user ? req.session.user.username : null;
+    pool.query('SELECT * FROM category', (err, categoriesResult) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const categories = categoriesResult || [];
+        if (!userId) {
+            // If not logged in, redirect to the login page
+            return res.redirect('/login'); // Adjust the login route as needed
+        }
+
+        const cartId = req.body.cartId;
+        const newQuantity = parseInt(req.body.quantity, 10);
+
+        // Your logic to update the cart quantity in the database
+        const updateCartQuantityQuery = `
+            UPDATE product_cart
+            SET quantity = ?
+            WHERE user_id = ? AND cart_id = ?;
+        `;
+
+        pool.query(updateCartQuantityQuery, [newQuantity, userId, cartId], (error, result) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            // Update the order status (assuming the column name is 'order_status')
+            const updateOrderStatusQuery = `
+                UPDATE product_cart
+                SET order_status = 'updated'
+                WHERE user_id = ? AND cart_id = ?;
+            `;
+
+            pool.query(updateOrderStatusQuery, [userId, cartId], (error, result) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Fetch updated cart items (replace this with your actual logic)
+                pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
+                    if (error) {
+                        console.error(error);
+                        return res.status(500).send('Internal Server Error');
+                    }
+
+                    // Render the cart page with the updated cart items
+                    res.render('pages/cart_product', { cartItems, username, categories });
+                });
+            });
+        });
+    });
+});
+
+*/
 
 
 
 // Assuming you have an instance of Express called 'app' and a database pool called 'pool'
+
 app.post('/remove_from_cart', (req, res) => {
     const { cartId } = req.body;
 
@@ -639,38 +1624,39 @@ app.post('/remove_from_cart', (req, res) => {
 
         const categories = categoriesResult || [];
 
-    // Your logic to remove the item from the product_cart table in the database
-    const removeCartItemQuery = `
+        // Your logic to remove the item from the product_cart table in the database
+        const removeCartItemQuery = `
         DELETE FROM product_cart
         WHERE cart_id = ? AND user_id = ?;
     `;
 
-    pool.query(removeCartItemQuery, [cartId, userId], (error, result) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).send('Internal Server Error');
-        }
-
-        // Fetch the updated cart items after removal (replace this with your actual logic)
-        pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, updatedCartItems) => {
+        pool.query(removeCartItemQuery, [cartId, userId], (error, result) => {
             if (error) {
                 console.error(error);
                 return res.status(500).send('Internal Server Error');
             }
 
-            // Render the cart_product page with the updated cart items
-            res.render('pages/cart_product', { cartItems: updatedCartItems,username,categories  });
+            // Fetch the updated cart items after removal (replace this with your actual logic)
+            pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, updatedCartItems) => {
+                if (error) {
+                    console.error(error);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                // Render the cart_product page with the updated cart items
+                res.render('pages/cart_product', { cartItems: updatedCartItems, username, categories });
+            });
         });
     });
 });
-});
 
 
 
-// Add more routes and configurations as needed
 
 
 
+
+//test
 
 
 
@@ -690,17 +1676,119 @@ app.get('/checkout', function (req, res) {
 
         const categories = categoriesResult || [];
 
+
+
         // Fetch cart items (replace this with your actual logic)
         pool.query('SELECT * FROM product_cart WHERE user_id = ?', [userId], (error, cartItems) => {
             if (error) {
                 console.error(error);
                 return res.status(500).send('Internal Server Error');
             }
-
+            
             res.render('pages/checkout', { username, categories, cartItems });
         });
     });
 });
+
+app.post('/generateQR', (req, res) => {
+    const amount = parseFloat(req.body.amount || 0);
+    const mobileNumber = '0967781769'; // Replace with the customer's phone number
+
+    // Use your PromptPay QR code generation logic here
+    const promptPayQRCode = generatePayload(mobileNumber, { amount });
+    const option = {
+        color: {
+            dark: '#000',
+            light: '#fff'
+        }
+    }
+
+    QRCode.toDataURL(promptPayQRCode, option, (err, url) => {
+        if (err) {
+            console.log('generate fail')
+            return res.status(400).json({
+                RespCode: 400,
+                RespMessage: 'bad : ' + err
+            })
+        }
+        else {
+            return res.status(200).json({
+                RespCode: 200,
+                RespMessage: 'good',
+                Result: url
+            })
+        }
+
+    })
+});
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/img/') // Use the correct path relative to the root of your project
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// เพิ่มข้อมูลลูกค้าลงในฐานข้อมูล
+/*
+app.post('/saveCustomer', upload.single('payment'), (req, res) => {
+    const { firstName, lastName, email, phoneNumber, address, district, subDistrict, province, postalCode } = req.body;
+    const paymentFilePath = req.file ? req.file.path : ''; // ไฟล์การชำระเงิน (ถ้ามี)
+   
+     
+
+    const sql = `INSERT INTO customers (FirstName, LastName, Email, PhoneNumber, AddressLine1, District, SubDistrict, Province, PostalCode, payment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [firstName, lastName, email, phoneNumber, address, district, subDistrict, province, postalCode, paymentFilePath];
+    
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error saving customer:', err);
+            res.status(500).json({ error: 'Error saving customer' });
+            return;
+        }
+        console.log('Customer saved:', result);
+        res.json({ success: true });
+     
+    });
+    
+});
+*/
+app.post('/saveCustomer', upload.single('payment'), (req, res) => {
+    const { firstName, lastName, email, phoneNumber, address, district, subDistrict, province, postalCode } = req.body;
+    const paymentFilePath = req.file ? '/img/' + req.file.filename : '';  // ไฟล์การชำระเงิน (ถ้ามี)
+    const user_id = req.session.user.id;
+ // Assuming the user_id is stored in the session
+
+    if (!user_id) {
+        console.error('User ID not found in session');
+        res.status(400).json({ error: 'User ID not found in session' });
+        return;
+    }
+
+    const sql = `INSERT INTO customers (FirstName, LastName, Email, PhoneNumber, AddressLine1, District, SubDistrict, Province, PostalCode, payment, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [firstName, lastName, email, phoneNumber, address, district, subDistrict, province, postalCode, paymentFilePath, user_id];
+    
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error saving customer:', err);
+            res.status(500).json({ error: 'Error saving customer' });
+            return;
+        }
+        console.log('Customer saved:', result);
+        res.json({ success: true });
+    });
+});
+
+
+
+
+
 
 
 

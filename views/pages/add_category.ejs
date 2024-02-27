@@ -1,0 +1,25 @@
+<!-- views/pages/add_category.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Category</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>เพิ่มประเภทสินค้า</h1>
+        <% if (errorMessage) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= errorMessage %>
+            </div>
+        <% } %>
+        <form method="POST" action="/admin/add">
+            <div class="form-group">
+                <label for="categoryName">ชื่อประเภทสินค้า:</label>
+                <input type="text" class="form-control" id="categoryName" name="name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">บันทึกเพื่อเพิ่มประเภทสินค้า</button>
+        </form>
+    </div>
+</body>
+</html>

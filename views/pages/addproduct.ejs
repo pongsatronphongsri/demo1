@@ -1,0 +1,73 @@
+<!-- addproduct.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+</head>
+
+<body>
+    <h1>Add Product</h1>
+
+    <form action="/admin/addproduct" method="POST" >
+        <div class="mb-3">
+            <label for="product_id" class="form-label">Product ID:</label>
+            <select class="form-select" id="product_id" name="product_id" required>
+                <% products.forEach(product=> { %>
+                    <option value="<%= product.product_id %>">
+                        <%= product.model %>
+                    </option>
+                    <% }) %>
+            </select>
+            <script>
+                // ตัวอย่างการใช้งานของ jQuery เพื่อตรวจสอบค่า product_id
+                $(document).ready(function () {
+                    $('#product_id').change(function () {
+                        var selectedProductId = $(this).val();
+                        console.log(selectedProductId);
+                    });
+                });
+
+            </script>
+        </div>
+
+        <div class="mb-3">
+            <label for="brand_id" class="form-label">Brand ID:</label>
+            <select class="form-select" id="brand_id" name="brand_id" required>
+                <% brands.forEach(brand=> { %>
+                    <option value="<%= brand.brand_id %>">
+                        <%= brand.brand_name %>
+                    </option>
+                <% }) %>
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="detail_id" class="form-label">Detail ID:</label>
+            <input type="text" class="form-control" id="detail_id" name="detail_id" required>
+        </div>
+        <div class="mb-3">
+            <label for="details" class="form-label">Details:</label>
+            <textarea class="form-control" id="details" name="details" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="picture" class="form-label">Picture:</label>
+            <input type="file" class="form-control" id="picture" name="picture" required>
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price:</label>
+            <input type="text" class="form-control" id="price" name="price" required>
+        </div>
+        <div class="mb-3">
+            <label for="text" class="form-label">Text:</label>
+            <input type="text" class="form-control" id="text" name="text" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</body>
+
+</html>

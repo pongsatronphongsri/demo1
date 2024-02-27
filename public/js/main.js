@@ -159,7 +159,8 @@ document.getElementById('addToCartForm').addEventListener('submit', function (ev
         console.error('Error:', error);
         // Handle errors if needed
     });
-});   
+});  
+ 
 })(jQuery);
 
 

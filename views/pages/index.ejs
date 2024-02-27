@@ -106,12 +106,9 @@
                     id="navbar-vertical" style="width: calc(100% - 30px); z-index: 999;">
                     <div class="navbar-nav w-100">
                         <div class="nav-item dropdown dropright">
-                            <% categories.forEach(category=> { %>
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"
-                                    style="font-size: 14px;">
-                                    <%= category.name %>
-                                </a>
-                                <% }); %>
+                            <% categories.forEach(category => { %>
+                                <a class="dropdown-item" href="/?category=<%= category.id %>"><%= category.name %></a>
+                            <% }); %>
 
                         </div>
                     </div>
@@ -131,6 +128,7 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="/" class="nav-item nav-link active">หน้าเเรก</a>
                             <a href="/shop" class="nav-item nav-link">สินค้า</a>
+                           
 
                             <a href="/contact" class="nav-item nav-link">ติดต่อ</a>
                         </div>
@@ -204,7 +202,8 @@
                 <% }); %>
         </div>
         <!-- Products End -->
-
+       
+        
         <!-- Footer Start -->
         <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
             <div class="row px-xl-5 pt-5">
