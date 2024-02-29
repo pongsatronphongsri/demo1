@@ -643,24 +643,40 @@ app.post('/admin/addproduct', verifyAdmin, (req, res) => {
 
 //delete product
 // Server-side route to handle product deletion
+// index.js
 app.post('/admin/deleteproduct', verifyAdmin, (req, res) => {
     const { table, id } = req.body;
 
-    // Delete the record from the specified table
+    // Delete the related records from the product_cart table
     connection.query(
-        `DELETE FROM ${table} WHERE product_id = ?`,
+        'DELETE FROM product_cart WHERE detail_id IN (SELECT detail_id FROM product_brand_relationship WHERE detail_id = ?)',
         [id],
         (err, result) => {
             if (err) {
-                console.error(`Error deleting record from ${table}:`, err);
-                res.status(500).send(`Error deleting record from ${table}`);
+                console.error('Error deleting related records from product_cart:', err);
+                res.status(500).send('Error deleting related records from product_cart');
                 return;
             }
-            console.log(`Record deleted successfully from ${table}`);
-            res.redirect('/admin');
+
+            // Now delete the record from the product_brand_relationship table
+            connection.query(
+                'DELETE FROM product_brand_relationship WHERE detail_id = ?',
+                [id],
+                (err, result) => {
+                    if (err) {
+                        console.error('Error deleting product:', err);
+                        res.status(500).send('Error deleting product');
+                        return;
+                    }
+                    console.log('Product deleted successfully');
+                    res.redirect('/admin');
+                }
+            );
         }
     );
 });
+
+
 
 //order product
 /*

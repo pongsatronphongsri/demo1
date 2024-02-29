@@ -249,9 +249,10 @@
                            
                             <form action="/admin/deleteproduct" method="POST">
                                 <input type="hidden" name="table" value="product_brand_relationship">
-                                <input type="hidden" name="id" value="<%= relationship.product_id %>">
+                                <input type="hidden" name="id" value="<%= relationship.detail_id %>">
                                 <button class="btn btn-sm btn-danger" type="submit">Delete</button>
                             </form>
+                            
                             
                         </td>
                     </tr>
