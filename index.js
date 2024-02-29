@@ -11,7 +11,8 @@ const _ = require('lodash')
 const cors = require('cors')
 const path = require('path');
 const multer = require('multer');
-
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 
 var app = express();
 
@@ -535,7 +536,8 @@ app.get('/admin/addproduct', verifyAdmin, (req, res) => {
         });
     });
 });
-
+*/
+/*
 // Handle form submission for adding a new product-brand relationship
 // Handle form submission for adding a new product-brand relationship
 app.post('/admin/addproduct', verifyAdmin, (req, res) => {
@@ -563,8 +565,9 @@ app.post('/admin/addproduct', verifyAdmin, (req, res) => {
         }
     );
 });
-
 */
+
+
 app.get('/admin/addproduct', (req, res) => {
     connection.query('SELECT brand_id, brand_name FROM brands', (err, brands) => {
         if (err) {
@@ -582,7 +585,6 @@ app.get('/admin/addproduct', (req, res) => {
         });
     });
 });
-
 
 
 
@@ -611,8 +613,9 @@ app.post('/admin/addproduct', verifyAdmin, (req, res) => {
         }
     );
 });
-
 */
+
+
 app.post('/admin/addproduct', verifyAdmin, (req, res) => {
     console.log(req.body); // Check the data sent in the form
     const { product_id, brand_id, detail_id, details, picture, price, text } = req.body;
@@ -632,6 +635,11 @@ app.post('/admin/addproduct', verifyAdmin, (req, res) => {
         }
     );
 });
+
+
+
+
+
 
 //delete product
 // Server-side route to handle product deletion
@@ -708,6 +716,45 @@ app.get('/admin/orders', verifyAdmin, (req, res) => {
         res.render('pages/orders', { results: results }); // ตรงนี้ให้ใช้ results: results แทน { orders: results }
     });
 });
+/*
+app.get('/admin/customers', (req, res) => {
+    const sql = `
+        SELECT
+            c.CustomerID,
+            c.FirstName,
+            c.LastName,
+            c.Email,
+            c.PhoneNumber,
+            c.AddressLine1,
+            c.District,
+            c.SubDistrict,
+            c.Province,
+            c.PostalCode,
+            c.payment,
+            c.order_id,
+            c.payment_status,
+            c.user_id,
+            pc.cart_id,
+            pc.detail_id,
+            pc.quantity,
+            pc.price,
+            pc.picture,
+            pc.details
+        FROM
+            customers c
+        LEFT JOIN
+            product_cart pc ON c.user_id = pc.user_id;
+    `;
+    connection.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching customers:', err);
+            res.status(500).json({ error: 'Error fetching customers' });
+            return;
+        }
+        res.render('pages/customers', { customers: results });
+    });
+});
+*/
 
 app.get('/admin/customers', (req, res) => {
     const sql = `
@@ -747,7 +794,68 @@ app.get('/admin/customers', (req, res) => {
     });
 });
 
+/*
+app.get('/admin/customers', (req, res) => {
+    const sql = `
+        SELECT
+            c.CustomerID,
+            c.FirstName,
+            c.LastName,
+            c.Email,
+            c.PhoneNumber,
+            c.AddressLine1,
+            c.District,
+            c.SubDistrict,
+            c.Province,
+            c.PostalCode,
+            c.payment,
+            c.order_id,
+            c.payment_status,
+            c.user_id,
+            pc.cart_id,
+            pc.detail_id,
+            pc.quantity,
+            pc.price,
+            pc.picture,
+            pc.details
+        FROM
+            customers c
+        LEFT JOIN
+            product_cart pc ON c.user_id = pc.user_id;
+    `;
+    connection.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching customers:', err);
+            res.status(500).json({ error: 'Error fetching customers' });
+            return;
+        }
 
+        // Insert fetched data into the new 'orders' table
+        results.forEach(customer => {
+            const order = {
+                customer_id: customer.CustomerID,
+                user_id: customer.user_id,
+                total: customer.price * customer.quantity,
+                payment_status: customer.payment_status,
+                shipping_address: customer.AddressLine1,
+                phone_number: customer.PhoneNumber,
+                email: customer.Email
+            };
+        
+            const orderSql = `INSERT INTO ordersed (customer_id, user_id, total, payment_status, shipping_address, phone_number, email) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            const orderValues = [order.customer_id, order.user_id, order.total, order.payment_status, order.shipping_address, order.phone_number, order.email];
+        
+            connection.query(orderSql, orderValues, (err, result) => {
+                if (err) {
+                    console.error('Error inserting order:', err);
+                    return;
+                }
+                console.log('Order inserted:', result);
+            });
+        });
+    });
+});
+*/
 
 
 
@@ -2012,6 +2120,75 @@ app.post('/cart', (req, res) => {
         });
 });
 
+
+app.post('/generateReport', (req, res) => {
+    const customerID = req.body.customerID;
+    if (!customerID) {
+        console.error('Customer ID not found in request body');
+        res.status(400).send('Customer ID not found in request body');
+        return;
+    }
+
+    // Fetch customer data from the database based on the customer ID
+    const customerSql = `SELECT * FROM customers WHERE CustomerID = ?`;
+    connection.query(customerSql, [customerID], (err, customerResult) => {
+        if (err) {
+            console.error('Error fetching customer data:', err);
+            res.status(500).send('Error fetching customer data');
+            return;
+        }
+
+        if (customerResult.length === 0) {
+            console.error('Customer not found');
+            res.status(404).send('Customer not found');
+            return;
+        }
+
+        const customer = customerResult[0];
+
+        // Fetch product cart data for the customer
+        const cartSql = `SELECT * FROM product_cart WHERE user_id = ?`;
+        connection.query(cartSql, [customer.user_id], (err, cartResults) => {
+            if (err) {
+                console.error('Error fetching product cart data:', err);
+                res.status(500).send('Error fetching product cart data');
+                return;
+            }
+
+            // Create a PDF report for the customer
+            const doc = new PDFDocument();
+            // Set up the PDF content
+            doc.fontSize(16).text('Customer Report', { align: 'center' });
+            doc.moveDown();
+            doc.fontSize(14).text(`Customer ID: ${customer.CustomerID}`);
+            doc.fontSize(12).text(`Name: ${customer.FirstName} ${customer.LastName}`);
+            doc.text(`Email: ${customer.Email}`);
+            doc.text(`Phone Number: ${customer.PhoneNumber}`);
+            doc.text(`Address: ${customer.AddressLine1}, ${customer.District}, ${customer.SubDistrict}, ${customer.Province} ${customer.PostalCode}`);
+            doc.text(`Payment: ${customer.payment.replace(/\\/g, '/')}`);
+            doc.text(`Order ID: ${customer.order_id}`);
+            doc.text(`Payment Status: ${customer.payment_status}`);
+            doc.text(`User ID: ${customer.user_id}`);
+
+            // Add product cart details to the PDF
+            doc.moveDown();
+            doc.fontSize(16).text('Product Cart Details');
+            cartResults.forEach((cartItem, index) => {
+                doc.moveDown();
+                doc.fontSize(12).text(`Product ${index + 1}`);
+                doc.text(`Detail ID: ${cartItem.detail_id}`);
+                doc.text(`Quantity: ${cartItem.quantity}`);
+                doc.text(`Price: ${cartItem.price}`);
+                doc.text(`Details: ${cartItem.details}`);
+            });
+
+            // Finalize the PDF and send it as a download
+            res.setHeader('Content-Disposition', `attachment; filename=Customer_Report_${customerID}.pdf`);
+            doc.pipe(res);
+            doc.end();
+        });
+    });
+});
 
 
 

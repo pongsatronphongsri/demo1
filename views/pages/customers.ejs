@@ -1,6 +1,7 @@
 <!-- admin/customers.ejs -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,7 +30,7 @@
             border-bottom: 2px solid #dee2e6;
         }
 
-        .table tbody + tbody {
+        .table tbody+tbody {
             border-top: 2px solid #dee2e6;
         }
 
@@ -38,74 +39,122 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1 class="my-4">Admin Customers</h1>
-        <% let groupedCustomers = {}; %>
-        <% customers.forEach(customer => { %>
-            <% if (!groupedCustomers[customer.CustomerID]) { %>
-                <% groupedCustomers[customer.CustomerID] = []; %>
-            <% } %>
-            <% groupedCustomers[customer.CustomerID].push(customer); %>
-        <% }); %>
+        <% let groupedCustomers={}; %>
+            <% customers.forEach(customer=> { %>
+                <% if (!groupedCustomers[customer.CustomerID]) { %>
+                    <% groupedCustomers[customer.CustomerID]=[]; %>
+                        <% } %>
+                            <% groupedCustomers[customer.CustomerID].push(customer); %>
+                                <% }); %>
 
-        <% Object.keys(groupedCustomers).forEach(customerID => { %>
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>CustomerID</th>
-                        <th>FirstName</th>
-                        <th>LastName</th>
-                        <th>Email</th>
-                        <th>PhoneNumber</th>
-                        <th>AddressLine1</th>
-                        <th>District</th>
-                        <th>SubDistrict</th>
-                        <th>Province</th>
-                        <th>PostalCode</th>
-                        <th>Payment</th>
-                        <th>OrderID</th>
-                        <th>PaymentStatus</th>
-                        <th>User ID</th>
-                        <th>ProductID</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Picture</th>
-                        <th>Details</th>
-                        <!-- Add more headers as needed -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <% groupedCustomers[customerID].forEach(customer => { %>
-                        <tr>
-                            <td><%= customer.CustomerID %></td>
-                            <td><%= customer.FirstName %></td>
-                            <td><%= customer.LastName %></td>
-                            <td><%= customer.Email %></td>
-                            <td><%= customer.PhoneNumber %></td>
-                            <td><%= customer.AddressLine1 %></td>
-                            <td><%= customer.District %></td>
-                            <td><%= customer.SubDistrict %></td>
-                            <td><%= customer.Province %></td>
-                            <td><%= customer.PostalCode %></td>
-                            <td><img src="<%= customer.payment.replace(/\\/g, '/') %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
+                                    <% Object.keys(groupedCustomers).forEach(customerID=> { %>
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>CustomerID</th>
+                                                    <th>FirstName</th>
+                                                    <th>LastName</th>
+                                                    <th>Email</th>
+                                                    <th>PhoneNumber</th>
+                                                    <th>AddressLine1</th>
+                                                    <th>District</th>
+                                                    <th>SubDistrict</th>
+                                                    <th>Province</th>
+                                                    <th>PostalCode</th>
+                                                    <th>Payment</th>
+                                                    <th>OrderID</th>
+                                                    <th>PaymentStatus</th>
+                                                    <th>User ID</th>
+                                                    <th>ProductID</th>
+                                                    <th>Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Picture</th>
+                                                    <th>Details</th>
+                                                    <th>ออกรายงาน</th>
+                                                    <!-- Add more headers as needed -->
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% groupedCustomers[customerID].forEach(customer=> { %>
+                                                    <tr>
+                                                        <td>
+                                                            <%= customer.CustomerID %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.FirstName %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.LastName %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.Email %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.PhoneNumber %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.AddressLine1 %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.District %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.SubDistrict %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.Province %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.PostalCode %>
+                                                        </td>
+                                                        <td><img src="<%= customer.payment.replace(/\\/g, '/') %>"
+                                                                alt="Product Image"
+                                                                style="max-width: 100px; max-height: 100px;"></td>
 
-                            <td><%= customer.order_id %></td>
-                            <td><%= customer.payment_status %></td>
-                            <td><%= customer.user_id %></td>
-                            <td><%= customer.detail_id %></td>
-                            <td><%= customer.quantity %></td>
-                            <td><%= customer.price %></td>
-                            <td><img src="<%= customer.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
-                            <td><%= customer.details %></td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-        <% }); %>
+                                                        <td>
+                                                            <%= customer.order_id %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.payment_status %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.user_id %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.detail_id %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.quantity %>
+                                                        </td>
+                                                        <td>
+                                                            <%= customer.price %>
+                                                        </td>
+                                                        <td><img src="<%= customer.picture %>" alt="Product Image"
+                                                                style="max-width: 100px; max-height: 100px;"></td>
+                                                        <td>
+                                                            <%= customer.details %>
+                                                        </td>
+                                                        <td>
+                                                            <form action="/generateReport" method="POST">
+                                                                <input type="hidden" name="customerID"
+                                                                    value="<%= customer.CustomerID %>">
+                                                                <button type="submit" class="btn btn-primary">Generate
+                                                                    Report</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                            </tbody>
+                                        </table>
+                                        <% }); %>
     </div>
 
     <!-- Bootstrap JS (optional) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
