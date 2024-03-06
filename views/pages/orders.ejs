@@ -13,43 +13,66 @@
 
 <body>
     <div class="container mt-5">
-      <!-- pages/orders.ejs -->
-<!-- pages/orders.ejs -->
-<h1>Orders</h1>
-<table>
-    <thead>
-        <tr>
-            <th>User ID</th>
-            <th>Detail ID</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Picture</th>
-            <th>Details</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% results.forEach(order => { %>
-            <tr>
-                <td><%= order.user_id %></td>
-                <td><%= order.detail_id %></td>
-                <td><%= order.quantity %></td>
-                <td><%= order.price %></td>
-                <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
-                <td><%= order.details %></td>
-                <td>
+        <a href="/admin" class="btn btn-secondary">Back</a> <!-- Back button -->
+
+
+<h1>Latest Orders</h1>
+<% Object.keys(groupedOrders).forEach(date => { %>
+    <h2><%= date %></h2>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User ID</th>
+                    <th>Product ID</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Details</th>
+                    <th>Image</th>
+                    <th>Order Date</th>
+                    <th>view customer</th>
+                    <th>delivery status</th>
                    
-                </td>
-                <a href="/admin/customers">Customers</a>
-            </tr>
-        <% }); %>
-    </tbody>
-</table>
-
-
-
-
-
+                </tr>
+            </thead>
+            <tbody>
+                <% groupedOrders[date].forEach(order => { %>
+                    <tr>
+                        <td><%= order.order_id %></td>
+                        <td><%= order.user_id %></td>
+                        <td><%= order.detail_id %></td>
+                        <td><%= order.quantity %></td>
+                        <td><%= order.price %></td>
+                        <td><%= order.details %></td>
+                        <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
+                        <td><%= order.order_date %></td>
+                        <td>
+                            <a href="/admin/orders/address/<%= order.user_id %>" class="btn btn-primary">View Address</a>
+                        </td>
+                        <td>
+                            <form action="/admin/orders/update-delivery-status/<%= order.order_id %>" method="POST">
+                                <div class="input-group">
+                                    <select class="custom-select" name="newStatus">
+                                        <option value="Pending" <% if (order.delivery_status === 'Pending') { %> selected <% } %>>Pending</option>
+                                        <option value="Processing" <% if (order.delivery_status === 'Processing') { %> selected <% } %>>Processing</option>
+                                        <option value="Shipped" <% if (order.delivery_status === 'Shipped') { %> selected <% } %>>Shipped</option>
+                                        <option value="Delivered" <% if (order.delivery_status === 'Delivered') { %> selected <% } %>>Delivered</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="submit">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </td>
+                        
+                        
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+<% }); %>
 
     </div>
 </body>

@@ -157,182 +157,45 @@
         </div>
     </div>
     <!-- Navbar End -->
-    <!-- Checkout Start -->
-    <div class="container-fluid">
-        <div class="row px-xl-5">
-            <!-- Billing Address -->
-            <div class="col-lg-8">
-                <h5 class="section-title position-relative text-uppercase mb-3"><span
-                        class="bg-secondary pr-3">ข้อมูลจัดส่งสินค้า</span></h5>
-                <div class="bg-light p-4 mb-5">
-                    <!-- Form for Billing Address -->
-                    <form id="customerForm">
-                     
-                        <div class="row">
-                            <div class="col-md-6 form-group">
-                                <label>ชื่อ</label>
-                                <input id="firstName" class="form-control" type="text" name="firstName" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>นามสกุล</label>
-                                <input id="lastName" class="form-control" type="text" name="lastName" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>อีเมล์</label>
-                                <input id="email" class="form-control" type="text" name="email" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>เบอร์โทรศัพท์</label>
-                                <input id="phoneNumber" class="form-control" type="text" name="phoneNumber"
-                                    placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>ที่อยู่เลขที่</label>
-                                <input id="address" class="form-control" type="text" name="address" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>เขต/อำเภอ</label>
-                                <input id="district" class="form-control" type="text" name="district" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>แขวง/ตำบล</label>
-                                <input id="subDistrict" class="form-control" type="text" name="subDistrict"
-                                    placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>จังหวัด</label>
-                                <input id="province" class="form-control" type="text" name="province" placeholder="">
-                            </div>
-                            <div class="col-md-6 form-group">
-                                <label>รหัสไปรษณีย์</label>
-                                <input id="postalCode" class="form-control" type="text" name="postalCode"
-                                    placeholder="">
-                            </div>
-
-                            <div class="col-md-6 form-group">
-                                <label>อัปโหลดสลิปการชำระเงิน</label>
-                                <input id="payment" class="form-control" type="file" name="payment">
-                            </div>
-
-                        </div>
-                    </form>
-
-                </div>
+    <div class="container mt-5">
+        <h1>Orders</h1>
+        <% Object.keys(groupedOrders).forEach(date => { %>
+            <h2><%= date %></h2>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User ID</th>
+                            <th>Product ID</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Details</th>
+                            <th>Image</th>
+                            <th>Order Date</th>
+                            <th>Delivery Status</th> <!-- Add this column header -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% groupedOrders[date].forEach(order => { %>
+                            <tr>
+                                <td><%= order.order_id %></td>
+                                <td><%= order.user_id %></td>
+                                <td><%= order.detail_id %></td>
+                                <td><%= order.quantity %></td>
+                                <td><%= order.price %></td>
+                                <td><%= order.details %></td>
+                                <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
+                                <td><%= new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %> <%= new Date(order.order_date).toLocaleTimeString('th-TH') %></td>
+                                <td><%= order.delivery_status %></td> <!-- Display delivery status -->
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
             </div>
-
-            <!-- Order Total (Moved to alongside Billing Address) -->
-            <div class="col-lg-4">
-                <div class="bg-light p-4 mb-5">
-                    <h5 class="section-title position-relative text-uppercase mb-3"><span
-                            class="bg-secondary pr-3">สินค้าท้งหมด</span></h5>
-                    <div class="border-bottom mb-3">
-                        <h6 class="mb-3">สินค้า</h6>
-                        <!-- Display cart items -->
-                        <% cartItems.forEach(item=> { %>
-                            <div class="d-flex justify-content-between mb-2">
-                                <p>
-                                    <%= item.details %>
-                                </p>
-                                <p>
-                                    <%= item.price.toFixed(2) %> บาท
-                                </p>
-                            </div>
-                            <% }); %>
-                    </div>
-
-                    <!-- Total Section -->
-                    <div class="d-flex justify-content-between mt-2">
-                        <%     function calculateTotal(cartItems) {
-                            let total = 0;
-                            // Iterate through cart items and calculate the total
-                            for (const item of cartItems) {
-                                total += item.price * item.quantity;
-                            }
-                            return total;
-                        } %>
-                        <h5>ทั้งหมด</h5>
-                        <p id="test" class="font-weight-bold">ราคารวมทั้งสิ้น:<span id="totalAmount">
-                                <%= calculateTotal(cartItems) %>
-                            </span> บาท</p>
-
-                    </div>
-                </div>
-                <div>
-
-                    <button onclick="generatePromptPay()">กด Qrcode เพื่อชำระเงิน</button>
-                </div>
-                <img id="imgqr" src="" style="width: 500px; object-fit: contain;">
-
-                <button class="btn btn-block btn-primary font-weight-bold py-3" onclick="saveCustomer()">ยืนยันการสั่งซื้อ</button>
-                <script>
-                 function saveCustomer() {
-                    const formData = new FormData(document.getElementById('customerForm'));
-                    
-                    fetch('/saveCustomer', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Customer saved:', data);
-                        // ทำอะไรต่อไปหลังจากบันทึกข้อมูลสำเร็จ
-                        alert('Order confirmed. Thank you for your purchase!');
-                        window.location.href = '/my-orders';
-                    })
-                    .catch(error => {
-                        console.error('Error saving customer:', error);
-                        // การจัดการข้อผิดพลาด
-                    });
-                }
-                 
-            </script>
-
-         
-
-
-                <script>
-                 
-                    function generatePromptPay() {
-                        // Get the total amount from the rendered HTML
-                        const totalAmount = parseFloat(document.getElementById('totalAmount').innerText);
-
-                        // Make an AJAX request to generate the PromptPay QR code
-                        $.ajax({
-                            method: 'POST',
-                            url: 'http://localhost:8080/generateQR',
-                            data: {
-                                amount: totalAmount
-                            },
-                            success: function (response) {
-                                console.log('Success', response);
-                                // Display the generated QR code
-                                $("#imgqr").attr('src', response.Result);
-                            },
-                            error: function (err) {
-                                console.log('Error', err);
-                                alert('Failed to generate QR code: ' + err);
-                            }
-                        });
-                    }
-                </script>
-
-            </div>
-
-            <!-- Payment Section -->
-            <div class="col-lg-8">
-
-            </div>
-
-        </div>
+        <% }); %>
     </div>
-
-
-
+    
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
         <div class="row px-xl-5 pt-5">
@@ -394,11 +257,7 @@
     <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
 
-    <script>
-        function calculateSubtotal(cartItems) {
-            return cartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
-        }
-    </script>
+
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>

@@ -17,7 +17,7 @@
         <h1>เเก้ไขข้อมูลสินค้า</h1>
 
         <% relationships.forEach(relationship => { %>
-            <form action="/admin/edit" method="POST">
+            <form action="/admin/edit" method="POST" >
                 <input type="hidden" name="product_id" value="<%= relationship.product_id %>">
                 <div class="mb-3">
                     <label for="brand_id" class="form-label">Brand ID:</label>
