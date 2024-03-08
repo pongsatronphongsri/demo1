@@ -43,16 +43,17 @@
             </div>
             <!-- Search bar -->
             <div class="col-lg-4 col-6 text-left">
-                <form action="">
+                <form action="/shop" method="GET" class="mb-4">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่">
+                        <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่" name="query">
                         <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-search"></i> ค้นหา
+                            </button>
                         </div>
                     </div>
                 </form>
+                
             </div>
             <!-- Button groups -->
             <div class="col-lg-4 text-right">
@@ -158,16 +159,15 @@
     </div>
 </div>
 <!-- Navbar End -->
-
 <div class="container mt-4">
     <h1 class="mb-4">Shop</h1>
 
-    <% if (selectedCategory && categories.some(category => category.id == selectedCategory)) { %>
-        <h3>Products in <%= categories.find(category => category.id == selectedCategory).name %></h3>
+    <% if (searchQuery) { %>
+        <h3>ผลการค้นหาสำหรับ : "<%= searchQuery %>"</h3>
     <% } %>
 
-    <% if (products.length > 0) { %>
-        <% products.forEach(product => { %>
+    <% products.forEach(product => { %>
+        <% if (!searchQuery || (searchQuery && (product.model && product.model.includes(searchQuery)) || (product.product_detail && product.product_detail.includes(searchQuery)))) { %>
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">
@@ -185,11 +185,17 @@
                     </div>
                 </div>
             </div>
-        <% }); %>
-    <% } else { %>
+        <% } %>
+    <% }); %>
+
+    <% if (products.filter(product => (!searchQuery || (searchQuery && ((product.model && product.model.includes(searchQuery)) || (product.product_detail && product.product_detail.includes(searchQuery)))))).length === 0) { %>
         <p>No products available.</p>
     <% } %>
 </div>
+
+
+
+
                             <!-- Footer Start -->
                             <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
                                 <div class="row px-xl-5 pt-5">

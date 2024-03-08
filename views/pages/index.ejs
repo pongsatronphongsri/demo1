@@ -43,13 +43,13 @@
             </div>
             <!-- Search bar -->
             <div class="col-lg-4 col-6 text-left">
-                <form action="">
+                <form action="/shop" method="GET" class="mb-4">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่">
+                        <input type="text" class="form-control" placeholder="ค้นหาสินค้าได้ที่นี่" name="query">
                         <div class="input-group-append">
-                            <span class="input-group-text bg-transparent text-primary">
-                                <i class="fa fa-search"></i>
-                            </span>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-search"></i> ค้นหา
+                            </button>
                         </div>
                     </div>
                 </form>

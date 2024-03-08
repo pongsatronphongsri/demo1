@@ -12,6 +12,8 @@ const cors = require('cors')
 const path = require('path');
 const multer = require('multer');
 const PDFDocument = require('pdfkit');
+const nodemailer = require('nodemailer');
+
 const fs = require('fs');
 
 var app = express();
@@ -71,6 +73,15 @@ connection.connect((err) => {
     console.log('Connected to MySQL database');
 });
 
+
+// ใส่ข้อมูลการเชื่อมต่อ SMTP ของคุณที่นี่
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'tawansapanyu54@gmail.com',
+        pass: 'xyli yrwe zgiz jodo'
+    }
+});
 // Registration endpoint
 
 app.get('/register', (req, res) => {
@@ -823,6 +834,7 @@ app.get('/admin/orders/address/:userId', function (req, res) {
     });
 });
 */
+
 app.get('/admin/orders/address/:userId', function (req, res) {
     const userId = req.params.userId;
 
@@ -841,6 +853,12 @@ app.get('/admin/orders/address/:userId', function (req, res) {
         res.render('pages/customer-address', { customer, paymentMade });
     });
 });
+
+
+
+
+
+
 
 
 // Update payment status route
@@ -879,6 +897,10 @@ app.post('/admin/orders/update-delivery-status/:orderId', function (req, res) {
 });
 
 app.get('/my-orders', function (req, res) {
+    if (!req.session.user) {
+        return res.send('<script>alert("Please log in to view your orders."); window.location.href="/login";</script>');
+    }
+
     const userId = req.session.user.id;
     const username = req.session.user.username; // Assuming username is stored in the session
 
@@ -891,6 +913,7 @@ app.get('/my-orders', function (req, res) {
         res.render('pages/my-orders', { orders, username, categories, groupedOrders });
     });
 });
+
 
 function fetchLatestOrders(userId, callback) {
     pool.query('SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC LIMIT 5', [userId], (err, ordersResult) => {
@@ -1328,7 +1351,7 @@ app.get('/', function (req, res) {
 
             // Check if a category ID was provided in the query string
             const categoryId = req.query.category;
-
+            const searchQuery = req.query.query;
             // If a category ID was provided, fetch products for that category
             if (categoryId) {
                 let sqlQuery = `
@@ -1353,7 +1376,8 @@ app.get('/', function (req, res) {
                         products: productsResult,
                         selectedCategory: categoryId,
                         username,
-                        sessionData
+                        sessionData,
+                        searchQuery :searchQuery
                     });
                 });
             } else {
@@ -1369,6 +1393,11 @@ app.get('/', function (req, res) {
         });
     });
 });
+
+///
+
+
+
 
 
 //shop
@@ -1423,6 +1452,7 @@ app.get('/shop', function (req, res) {
 });
 */
 //test shop
+/*
 app.get('/shop', function (req, res) {
     let sqlQuery = `
         SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
@@ -1478,10 +1508,68 @@ app.get('/shop', function (req, res) {
         });
     });
 });
-
+*/
 /////
+app.get('/shop', function (req, res) {
+    let sqlQuery = `
+        SELECT products.product_id, products.model, brands.brand_id, brands.brand_name, product_brand_relationship.details, product_details.detail as product_detail
+        FROM products
+        LEFT JOIN product_brand_relationship ON products.product_id = product_brand_relationship.product_id
+        LEFT JOIN brands ON product_brand_relationship.brand_id = brands.brand_id
+        LEFT JOIN product_details ON products.product_id = product_details.product_id
+    `;
 
+    const selectedCategory = req.query.category;
+    const searchQuery = req.query.query; // Get the search query from the query string
 
+    if (selectedCategory) {
+        sqlQuery += ` WHERE products.category_id = ${selectedCategory}`;
+    }
+
+    // If a search query is provided, filter products by the search query
+    if (searchQuery) {
+        sqlQuery += ` AND (products.model LIKE '%${searchQuery}%' OR product_details.detail LIKE '%${searchQuery}%')`;
+    }
+
+    pool.query(sqlQuery, (err, results) => {
+      
+
+        // Assume you have the username available in the session (replace this with your actual logic)
+        const username = req.session.user ? req.session.user.username : null;
+
+        // Fetch categories from the database
+        pool.query('SELECT * FROM categories', (err, categoriesResult) => {
+          
+
+            const categories = categoriesResult || [];
+
+            const products = results.reduce((acc, result) => {
+                const existingProduct = acc.find(p => p.product_id === result.product_id);
+                if (existingProduct) {
+                    existingProduct.brands.push({
+                        brand_id: result.brand_id,
+                        brand_name: result.brand_name,
+                        details: result.details
+                    });
+                } else {
+                    acc.push({
+                        product_id: result.product_id,
+                        model: result.model,
+                        product_detail: result.product_detail,
+                        brands: [{
+                            brand_id: result.brand_id,
+                            brand_name: result.brand_name,
+                            details: result.details
+                        }]
+                    });
+                }
+                return acc;
+            }, []);
+
+            res.render('pages/shop', { products, username, selectedCategory, categories, searchQuery });
+        });
+    });
+});
 
 
 
@@ -2447,11 +2535,37 @@ app.post('/saveCustomer', upload.single('payment'), (req, res) => {
 
 
 
+app.post('/contact', function (req, res) {
+    const { name, email, subject, message } = req.body;
+
+    const mailOptions = {
+        from: email, // Use the email entered by the user
+        to: 'tawansapanyu54@gmail.com',
+        subject: subject,
+        text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+            res.send('Error');
+        } else {
+            console.log('Email sent: ' + info.response);
+            res.render('pages/contact'); // Render the contact page again
+        }
+    });
+});
 
 
 app.get('/contact', function (req, res) {
-    res.render('pages/contact');
+    res.render('pages/contact', {
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+    });
 });
+
 
 
 app.get('/cart', function (req, res) {

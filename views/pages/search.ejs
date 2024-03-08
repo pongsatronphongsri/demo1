@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Shop</h1>
+    
+        <form action="/shop" method="GET" class="mb-4">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for products" name="search">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+    
+        <% if (products.length > 0) { %>
+            <% products.forEach(product => { %>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= product.model %>
+                        </h5>
+                        <div class="card-text">
+                            <p><strong>Product Details:</strong> <%= product.product_detail %></p>
+                            <% product.brands.forEach(brand => { %>
+                                <p><strong>Brand:</strong> <%= brand.brand_name %></p>
+                                <p><strong>Details:</strong> <%= brand.details %></p>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <p>No products found.</p>
+        <% } %>
+    </div>
+    
+</body>
+</html>
