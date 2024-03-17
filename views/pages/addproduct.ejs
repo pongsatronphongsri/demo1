@@ -7,15 +7,100 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product</title>
+    <title>เพิ่มข้อมูลสินค้า</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc;
+            width: 80%;
+            /* Set width to 80% of the container */
+            margin-top: 50px;
+            /* Add some top margin */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-top: 20px;
+            max-width: 600px;
+            /* Set max-width to limit the width of the form */
+            margin-left: auto;
+            /* Align the form to the center */
+            margin-right: auto;
+        }
+
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+
 </head>
 
 <body>
-    <h1>Add Product</h1>
+    <h1>เพิ่มข้อมูลสินค้า</h1>
 
-    <form action="/admin/addproduct" method="POST" >
+    <form action="/admin/addproduct" method="POST">
         <div class="mb-3">
-            <label for="product_id" class="form-label">Product ID:</label>
+            <div style="display: flex; justify-content: space-between;">
+                <label for="product_id" class="form-label">Modelสินค้า:</label>
+                <a href="/admin/model">เพิ่ม Modelสินค้า</a>
+            </div>
             <select class="form-select" id="product_id" name="product_id" required>
                 <% products.forEach(product=> { %>
                     <option value="<%= product.product_id %>">
@@ -36,37 +121,43 @@
         </div>
 
         <div class="mb-3">
-            <label for="brand_id" class="form-label">Brand ID:</label>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="brand_id" class="form-label">เเบนด์สินค้า:</label>
+            <a href="/admin/brand">เพิ่มเเบนด์</a><br>
+            </div>
             <select class="form-select" id="brand_id" name="brand_id" required>
                 <% brands.forEach(brand=> { %>
                     <option value="<%= brand.brand_id %>">
                         <%= brand.brand_name %>
                     </option>
-                <% }) %>
+                    <% }) %>
             </select>
         </div>
-        
+      
+        <a href="/admin/detail">เพิ่มdetail</a>
+
         <div class="mb-3">
             <label for="detail_id" class="form-label">Detail ID:</label>
             <input type="text" class="form-control" id="detail_id" name="detail_id" required>
         </div>
         <div class="mb-3">
-            <label for="details" class="form-label">Details:</label>
+            <label for="details" class="form-label">รายละเอียดสินค้า:</label>
             <textarea class="form-control" id="details" name="details" required></textarea>
         </div>
         <div class="mb-3">
-            <label for="picture" class="form-label">Picture:</label>
+            <label for="picture" class="form-label">รูปภาพ:</label>
             <input type="file" class="form-control" id="picture" name="picture" required>
         </div>
         <div class="mb-3">
-            <label for="price" class="form-label">Price:</label>
+            <label for="price" class="form-label">ราคา:</label>
             <input type="text" class="form-control" id="price" name="price" required>
         </div>
         <div class="mb-3">
-            <label for="text" class="form-label">Text:</label>
+            <label for="text" class="form-label">คำบรรยายสินค้า:</label>
             <input type="text" class="form-control" id="text" name="text" required>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+       
+        <button type="submit" class="btn btn-primary">บันทึกข้อมูลสินค้า</button>
     </form>
 </body>
 

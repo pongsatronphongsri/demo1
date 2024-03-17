@@ -13,6 +13,7 @@ const path = require('path');
 const multer = require('multer');
 const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
+const ExcelJS = require('exceljs');
 
 const fs = require('fs');
 
@@ -171,7 +172,8 @@ app.post('/login', (req, res) => {
 
     connection.query(selectQuery, [email], async (err, results) => {
         if (err || results.length === 0) {
-            res.status(401).send('Invalid email or password');
+            res.status(401).send('<script>alert("Invalid email or password");</script>');
+
             return;
         }
 
@@ -179,7 +181,8 @@ app.post('/login', (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            res.status(401).send('Invalid email or password');
+            res.status(401).send('<script>alert("Invalid email or password"); window.location.href = "/login";</script>');
+
             return;
         }
 
@@ -953,22 +956,167 @@ app.get('/admin/add-admin', verifyAdmin, (req, res) => {
 });
 
 // Express route for adding a new admin
-app.post('/admin/add-admin', verifyAdmin, (req, res) => {
+app.post('/admin/add-admin', verifyAdmin, async (req, res) => {
     const { username, email, password, phone } = req.body;
 
-    // Add logic to add admin to the database
-    // This is a basic example, you should add proper validation and error handling
-    pool.query('INSERT INTO users (username, email, password, phone, isAdmin) VALUES (?, ?, ?, ?, ?)', [username, email, password, phone, 1], (err, result) => {
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Add logic to add admin to the database
+        // This is a basic example, you should add proper validation and error handling
+        pool.query('INSERT INTO users (username, email, password, phone, isAdmin) VALUES (?, ?, ?, ?, ?)', [username, email, hashedPassword, phone, 1], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            res.redirect('/admin'); // Redirect to admin page
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+//report excel
+app.get('/admin/orders/export', function (req, res) {
+    // Fetch all orders with customer names from the database
+    pool.query('SELECT o.order_id, o.user_id, u.username AS customer_name, o.details, o.quantity, o.price, o.order_date, o.delivery_status FROM orders o LEFT JOIN users u ON o.user_id = u.id ORDER BY o.order_date DESC', (err, ordersResult) => {
         if (err) {
             console.error(err);
             return res.status(500).send('Internal Server Error');
         }
 
-        res.redirect('/admin'); // Redirect to admin page
+        const orders = ordersResult || [];
+
+        // Group orders by order date and time
+        const groupedOrders = orders.reduce((acc, order) => {
+            const key = order.order_date.toISOString().slice(0, 19).replace('T', ' ');
+            if (!acc[key]) {
+                acc[key] = [];
+            }
+            acc[key].push(order);
+            return acc;
+        }, {});
+
+        // Create a new Excel workbook and worksheet
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Orders');
+
+        // Add headers to the worksheet
+        worksheet.addRow(['Order ID', 'ชื่อผู้สั่ง', 'สินค้า', 'จำนวน', 'ราคาสินค้า', 'สถานะขนส่ง']);
+
+        // Add grouped orders data to the worksheet
+        Object.keys(groupedOrders).forEach(key => {
+            const ordersGroup = groupedOrders[key];
+            let totalGroupPrice = 0; // Initialize total price for the group
+            worksheet.addRow(['']); // Add an empty row for better readability
+            worksheet.addRow([`Orders for ${key}`]); // Add a row for the group header
+            ordersGroup.forEach(order => {
+                const totalPrice = order.quantity * order.price;
+                totalGroupPrice += totalPrice; // Add product total price to the group total price
+                worksheet.addRow([
+                    order.order_id,
+                    order.customer_name,
+                    order.details,
+                    order.quantity,
+                
+                    totalPrice,
+                    order.delivery_status,
+                   
+                ]);
+            });
+            // Add the total price for the group
+            worksheet.addRow(['', '', '', '', '', 'ราคารวมทั้งหมด:', totalGroupPrice]);
+        });
+
+        // Set the content type and disposition of the response
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=orders.xlsx');
+
+        // Write the workbook to the response
+        return workbook.xlsx.write(res)
+            .then(function () {
+                res.status(200).end();
+            });
+    });
+});
+
+// add/model
+app.get('/admin/model', (req, res) => {
+    
+ res.render('pages/add-model');
+    
+});
+
+
+  
+app.post('/admin/model', (req, res) => {
+    const { product_id, model, category_id } = req.body;
+    const sql = 'INSERT INTO products (product_id, model, category_id) VALUES (?, ?, ?)';
+    connection.query(sql, [product_id, model, category_id], (err, result) => {
+      if (err) {
+        console.error('Error adding product: ' + err.stack);
+        res.send('Error adding product');
+        return;
+      }
+      console.log('Product added successfully');
+      res.redirect('/admin/addproduct');
+    });
+});
+
+//addbrand
+app.get('/admin/brand', (req, res) => {
+    res.render('pages/add-brand');
+});
+app.post('/admin/brand', (req, res) => {
+    const { brand_id, brand_name } = req.body;
+    const sql = 'INSERT INTO brands (brand_id, brand_name) VALUES (?, ?)';
+    connection.query(sql, [brand_id, brand_name], (err, result) => {
+        if (err) {
+            console.error('Error adding brand: ' + err.stack);
+            res.send('Error adding brand');
+            return;
+        }
+        console.log('Brand added successfully');
+        res.redirect('/admin/addproduct');
+    });
+});
+
+//add-product_detail
+app.get('/admin/detail', (req, res) => {
+    pool.query('SELECT product_id, model FROM products', (err, productsResult) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Internal Server Error');
+        }
+
+        const productModels = productsResult.reduce((acc, product) => {
+            acc[product.product_id] = product.model;
+            return acc;
+        }, {});
+
+        res.render('pages/add-detail', { productModels });
     });
 });
 
 
+
+app.post('/admin/detail', (req, res) => {
+    const { product_id, detail } = req.body;
+    const sql = 'INSERT INTO product_details (product_id, detail) VALUES (?, ?)';
+    pool.query(sql, [product_id, detail], (err, result) => {
+        if (err) {
+            console.error('Error adding product detail: ' + err.stack);
+            res.send('Error adding product detail');
+            return;
+        }
+        console.log('Product detail added successfully');
+        res.redirect('/admin/addproduct');
+    });
+});
 
 
 

@@ -78,15 +78,7 @@
 
 
 
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle"
-                        data-toggle="dropdown">ภาษาไทย</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาไทย</button>
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาอังกฤษ</button>
-                        <!-- Add more language options if needed -->
-                    </div>
-                </div>
+               
             </div>
         </div>
     </div>
@@ -145,20 +137,7 @@
                                 </span>
                             </a>
                              -->
-                            <form action="/add-to-cart" method="post">
-                                <% if (sessionData.user && sessionData.user.id) { %>
-                                    <input type="hidden" name="userId" value="<%= sessionData.user.id %>">
-                                    <% } %>
-                                        <!-- Add other form elements if needed -->
-                                        <button type="submit" class="btn px-0 ml-3">
-                                            <i class="fas fa-shopping-cart text-primary"></i>
-                                            <span class="badge text-secondary border border-secondary rounded-circle"
-                                                style="padding-bottom: 2px;">
-                                                <%= cartItems.length %>
-                                                    <!-- Assuming cartItems is an array containing cart items -->
-                                            </span>
-                                        </button>
-                            </form>
+                       
 
 
 
@@ -177,7 +156,7 @@
     <!-- Products Start -->
     <div class="container-fluid pt-5 pb-3">
         <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span
-                class="bg-secondary pr-3">สินค้าล่าสุด</span></h2>
+                class="bg-secondary pr-3">สินค้าตัวอย่าง</span></h2>
         <div class="row px-xl-5">
             <% printers.forEach(printer=> { %>
                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1">
@@ -185,7 +164,7 @@
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="<%= printer.picture %>" alt="">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="/detail?id=<%= printer.id %>"><i
+                                <a class="btn btn-outline-dark btn-square" href="/shop"><i
                                         class="fa fa-search"></i></a>
                             </div>
                         </div>
@@ -195,7 +174,7 @@
                             </a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
                                 <h5>
-                                    <%= printer.price %>
+                                    
                                 </h5>
                                 <h6 class="text-muted ml-2"></h6>
                             </div>
@@ -247,8 +226,8 @@
                         <div class="col-md-4 mb-5">
                             <h6 class="text-secondary text-uppercase mt-4 mb-3">ช่องทางการติดตาม</h6>
                             <div class="d-flex">
-                                <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                                <a class="btn btn-primary btn-square mr-2" href="#"><i
+                                
+                                <a class="btn btn-primary btn-square mr-2" href="https://web.facebook.com/p/Jiant-Blue-Systems-%E0%B9%84%E0%B8%88%E0%B9%81%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B9%8C%E0%B8%9A%E0%B8%B9%E0%B8%A5%E0%B8%8B%E0%B8%B4%E0%B8%AA%E0%B9%80%E0%B8%97%E0%B9%87%E0%B8%A1%E0%B8%AA%E0%B9%8C-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%88%E0%B8%B5%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%A3%E0%B8%B5-100057589354258/?_rdc=1&_rdr"><i
                                         class="fab fa-facebook-f"></i></a>
                                 <a class="btn btn-primary btn-square mr-2" href="#"><i
                                         class="fab fa-linkedin-in"></i></a>

@@ -79,15 +79,7 @@
 
 
 
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle"
-                        data-toggle="dropdown">ภาษาไทย</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาไทย</button>
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาอังกฤษ</button>
-                        <!-- Add more language options if needed -->
-                    </div>
-                </div>
+               
             </div>
         </div>
     </div>
@@ -215,36 +207,10 @@
             <p id="test" class="font-weight-bold">ราคารวมทั้งสิ้น:<span id="totalAmount">
                 <%= calculateTotal(cartItems) %>
             </span> บาท</p>
-            <button onclick="generatePromptPay()">กด Qrcode เพื่อชำระเงิน</button>
-            <img id="imgqr" src="" style="width: 500px; object-fit: contain;">
+          
             <a  href="/checkout" class="btn btn-success">ชำระเงิน</a>
-            <img id="imgqr" src="" style="width: 500px; object-fit: contain;">
-           
-            <script>
-                 
-                function generatePromptPay() {
-                    // Get the total amount from the rendered HTML
-                    const totalAmount = parseFloat(document.getElementById('totalAmount').innerText);
-
-                    // Make an AJAX request to generate the PromptPay QR code
-                    $.ajax({
-                        method: 'POST',
-                        url: 'http://localhost:8080/generateQR',
-                        data: {
-                            amount: totalAmount
-                        },
-                        success: function (response) {
-                            console.log('Success', response);
-                            // Display the generated QR code
-                            $("#imgqr").attr('src', response.Result);
-                        },
-                        error: function (err) {
-                            console.log('Error', err);
-                            alert('Failed to generate QR code: ' + err);
-                        }
-                    });
-                }
-            </script>
+          
+         
             
     
             <!-- Add a form to proceed with the checkout, update quantities, etc. -->
