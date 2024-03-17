@@ -160,14 +160,13 @@
     <div class="container mt-5">
         <h1>Orders</h1>
         <% Object.keys(groupedOrders).forEach(date => { %>
-            <h2><%= date %></h2>
+            
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Order ID</th>
-                            <th>User ID</th>
-                            <th>Product ID</th>
+                      
                             <th>Quantity</th>
                             <th>Price</th>
                             <th>Details</th>
@@ -180,13 +179,13 @@
                         <% groupedOrders[date].forEach(order => { %>
                             <tr>
                                 <td><%= order.order_id %></td>
-                                <td><%= order.user_id %></td>
-                                <td><%= order.detail_id %></td>
+                               
                                 <td><%= order.quantity %></td>
                                 <td><%= order.price %></td>
                                 <td><%= order.details %></td>
                                 <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
-                                <td><%= new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %> <%= new Date(order.order_date).toLocaleTimeString('th-TH') %></td>
+                                <td><%= new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+
                                 <td><%= order.delivery_status %></td> <!-- Display delivery status -->
                             </tr>
                         <% }); %>

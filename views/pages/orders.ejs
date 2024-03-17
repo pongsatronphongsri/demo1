@@ -24,13 +24,12 @@
             <thead>
                 <tr>
                     <th>Order ID</th>
-                    <th>User ID</th>
-                    <th>Product ID</th>
+                  
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Details</th>
                     <th>Image</th>
-                    <th>Order Date</th>
+                   
                     <th>view customer</th>
                     <th>delivery status</th>
                    
@@ -40,13 +39,12 @@
                 <% groupedOrders[date].forEach(order => { %>
                     <tr>
                         <td><%= order.order_id %></td>
-                        <td><%= order.user_id %></td>
-                        <td><%= order.detail_id %></td>
+                      
                         <td><%= order.quantity %></td>
                         <td><%= order.price %></td>
                         <td><%= order.details %></td>
                         <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
-                        <td><%= order.order_date %></td>
+                       
                         <td>
                             <a href="/admin/orders/address/<%= order.user_id %>" class="btn btn-primary">View Address</a>
                         </td>
@@ -54,10 +52,10 @@
                             <form action="/admin/orders/update-delivery-status/<%= order.order_id %>" method="POST">
                                 <div class="input-group">
                                     <select class="custom-select" name="newStatus">
-                                        <option value="Pending" <% if (order.delivery_status === 'Pending') { %> selected <% } %>>Pending</option>
-                                        <option value="Processing" <% if (order.delivery_status === 'Processing') { %> selected <% } %>>Processing</option>
-                                        <option value="Shipped" <% if (order.delivery_status === 'Shipped') { %> selected <% } %>>Shipped</option>
-                                        <option value="Delivered" <% if (order.delivery_status === 'Delivered') { %> selected <% } %>>Delivered</option>
+                                        <option value="รอดำเนินการ" <% if (order.delivery_status === 'รอดำเนินการ') { %> selected <% } %>>รอดำเนินการ</option>
+                                        <option value="กำลังดำเนินการ" <% if (order.delivery_status === 'กำลังดำเนินการ') { %> selected <% } %>>กำลังดำเนินการ</option>
+                                        <option value="จัดส่งแล้ว" <% if (order.delivery_status === 'จัดส่งแล้ว') { %> selected <% } %>>จัดส่งแล้ว</option>
+                                      <option value="จัดส่งไม่สำเร็จ" <% if (order.delivery_status === 'จัดส่งไม่สำเร็จ') { %> selected <% } %>>จัดส่งไม่สำเร็จ</option>
                                     </select>
                                     <div class="input-group-append">
                                         <button class="btn btn-outline-secondary" type="submit">Update</button>

@@ -35,9 +35,9 @@
 
                 <!-- Check if payment has been made -->
                 <% if (paymentMade) { %>
-                    <p><strong>Payment Status:</strong> Paid</p>
+                    <p><strong>สถานะการชำระเงิน:</strong> ชำระเงินเเล้ว</p>
                     <% } else { %>
-                        <p><strong>Payment Status:</strong> Not Paid</p>
+                        <p><strong>สถานะการชำระเงิน:</strong> ยังไม่ชำระเงิน</p>
                         <form action="/admin/orders/pay/<%= customer.user_id %>" method="POST">
                             <button type="submit" class="btn btn-primary">Mark as Paid</button>
                         </form>

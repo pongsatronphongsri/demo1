@@ -127,10 +127,12 @@ app.post('/register', async (req, res) => {
                 console.error('Error registering user:', err);
                 return res.status(500).send(`Error registering user: ${err.message}`);
             }
-            res.status(201).send('User registered successfully!');
+            res.redirect('/login');
+            
         });
     } catch (error) {
         res.status(500).send('Error registering user');
+       
     }
 });
 
@@ -807,7 +809,9 @@ app.get('/admin/orders', function (req, res) {
 
         // Group orders by order date and time
         const groupedOrders = orders.reduce((acc, order) => {
-            const key = order.order_date.toISOString().slice(0, 19).replace('T', ' ');
+            //const key = order.order_date.toISOString().slice(0, 19).replace('T', ' ');
+            const key = new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
             if (!acc[key]) {
                 acc[key] = [];
             }
