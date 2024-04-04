@@ -87,6 +87,13 @@
         a:hover {
             text-decoration: underline;
         }
+        
+    .btn-brown {
+        background-color: #8B4513; /* Brown color */
+        color: white; /* Text color */
+    }
+    
+
     </style>
 
 
@@ -120,28 +127,21 @@
             </script>
         </div>
 
-        <div class="mb-3">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="brand_id" class="form-label">เเบนด์สินค้า:</label>
-            <a href="/admin/brand">เพิ่มเเบนด์</a><br>
-            </div>
-            <select class="form-select" id="brand_id" name="brand_id" required>
-                <% brands.forEach(brand=> { %>
-                    <option value="<%= brand.brand_id %>">
-                        <%= brand.brand_name %>
-                    </option>
-                    <% }) %>
-            </select>
-        </div>
+        
       
-        <a href="/admin/detail">เพิ่มdetail</a>
+     
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label for="detail_id" class="form-label">Detail ID:</label>
             <input type="text" class="form-control" id="detail_id" name="detail_id" required>
-        </div>
+        </div> -->
         <div class="mb-3">
-            <label for="details" class="form-label">รายละเอียดสินค้า:</label>
+            <label for="brand_name" class="form-label">ชื่อเเบรนด์:</label>
+            <input type="text" class="form-control" id="brand_name" name="brand_name" required>
+        </div> 
+        
+        <div class="mb-3">
+            <label for="details" class="form-label">ชื่อรุ่นสินค้า:</label>
             <textarea class="form-control" id="details" name="details" required></textarea>
         </div>
         <div class="mb-3">
@@ -153,11 +153,12 @@
             <input type="text" class="form-control" id="price" name="price" required>
         </div>
         <div class="mb-3">
-            <label for="text" class="form-label">คำบรรยายสินค้า:</label>
+            <label for="text" class="form-label">รายละเอียดสินค้า:</label>
             <input type="text" class="form-control" id="text" name="text" required>
         </div>
        
         <button type="submit" class="btn btn-primary">บันทึกข้อมูลสินค้า</button>
+        
     </form>
 </body>
 

@@ -25,6 +25,14 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .product-image {
+            max-width: 100px;
+            /* Set the maximum width for the image */
+            max-height: 100px;
+            /* Set the maximum height for the image */
+        }
+    </style>
 </head>
 
 <body>
@@ -38,7 +46,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -79,15 +87,7 @@
 
 
 
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle"
-                        data-toggle="dropdown">ภาษาไทย</button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาไทย</button>
-                        <button class="dropdown-item" type="button"><i class="fas fa-flag"></i> ภาษาอังกฤษ</button>
-                        <!-- Add more language options if needed -->
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -157,93 +157,132 @@
         </div>
     </div>
     <!-- Navbar End -->
-    <div class="container mt-5">
-        <h1>Orders</h1>
-        <% Object.keys(groupedOrders).forEach(date => { %>
-            
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                      
-                            <th>Quantity</th>
-                            <th>Price</th>
-                            <th>Details</th>
-                            <th>Image</th>
-                            <th>Order Date</th>
-                            <th>Delivery Status</th> <!-- Add this column header -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% groupedOrders[date].forEach(order => { %>
-                            <tr>
-                                <td><%= order.order_id %></td>
-                               
-                                <td><%= order.quantity %></td>
-                                <td><%= order.price %></td>
-                                <td><%= order.details %></td>
-                                <td><img src="<%= order.picture %>" alt="Product Image" style="max-width: 100px; max-height: 100px;"></td>
-                                <td><%= new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+    <!-- my-orders.ejs -->
 
-                                <td><%= order.delivery_status %></td> <!-- Display delivery status -->
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
-            </div>
-        <% }); %>
-    </div>
-    
-    <!-- Footer Start -->
-    <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
-        <div class="row px-xl-5 pt-5">
-            <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
-                <h5 class="text-secondary text-uppercase mb-4">ติดต่อ</h5>
-                <p class="mb-4">ราษฏรดำริ เทศบาลเมืองปราจีนบุรี 25000</p>
-                <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>277/2,อำเภอเมืองปราจีนบุรี,
-                    ปราจีนบุรี</p>
-                <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>chinnawat@jiantblue.co.th
-                </p>
-                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>037 452 142</p>
-            </div>
-            <div class="col-lg-8 col-md-12">
-                <div class="row">
-                    <div class="col-md-4 mb-5">
-                        <h5 class="text-secondary text-uppercase mb-4">ร้านค้า</h5>
-                        <div class="d-flex flex-column justify-content-start">
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>หน้าแรก</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>สินค้า</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ช้อปปิ้ง</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ติดต่อ</a>
+   <!-- my-orders.ejs -->
 
+<h1 class="mb-4">สินค้าที่สั่งซื้อ</h1>
+<% function formatDate(dateString) { const date=new Date(dateString); const options={ year: 'numeric' ,
+month: 'long' , day: 'numeric' , hour12: false };
+return date.toLocaleDateString('th-TH', options); } %>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>รหัสสั่งซื้อสินค้า</th>
+                <th>วันที่สั่งซื้อ</th>
+                <th>สถานะการขนส่ง</th>
+                <th>สถานะการชำระเงิน</th>
+                <th>สินค้า</th>
+                <th>ราคารวม</th>
+                <th>ชำระเงิน</th> <!-- Add a new column for the action button -->
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach(order => { %>
+                <tr>
+                    <td><%= order.order_id %></td>
+                    <td><%= formatDate(order.order_date) %></td>
+                    <td><%= order.delivery_status %></td>
+                    <td><%= order.payment_status %></td>
+                    <td>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อสินค้า</th>
+                                    <th>จำนวน</th>
+                                    <th>ราคา</th>
+                                    <th>รูปภาพสินค้า</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.details.forEach(detail => { %>
+                                    <tr>
+                                        <td><%= detail.details %></td>
+                                        <td><%= detail.quantity %></td>
+                                        <td><%= (detail.price * detail.quantity).toFixed(2) %></td>
+                                        <td><img class="product-image" src="<%= detail.picture %>" alt="<%= detail.details %>"></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </td>
+                    <td>
+                        <% const totalPrice = order.details.reduce((total, detail) => total + (detail.price * detail.quantity), 0); %>
+                        <%= totalPrice.toFixed(2) %>
+                    </td>
+                    <td>
+                        <% if (order.payment_status === 'ยังไม่ชำระเงิน') { %>
+                            <a href="/checkout_payment?orderId=<%= order.order_id %>" class="btn btn-primary">กลับไปชำระเงิน</a>
+                        <% } %>
+                    </td> <!-- Display action button for orders with payment_status 'ยังไม่ชำระเงิน' -->
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+
+        <!-- Footer Start -->
+        <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
+            <div class="row px-xl-5 pt-5">
+                <div class="col-lg-4 col-md-12 mb-5 pr-3 pr-xl-5">
+                    <h5 class="text-secondary text-uppercase mb-4">ติดต่อ</h5>
+                    <p class="mb-4">ราษฏรดำริ เทศบาลเมืองปราจีนบุรี 25000</p>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>277/2,อำเภอเมืองปราจีนบุรี,
+                        ปราจีนบุรี</p>
+                    <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>chinnawat@jiantblue.co.th
+                    </p>
+                    <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>037 452 142</p>
+                </div>
+                <div class="col-lg-8 col-md-12">
+                    <div class="row">
+                        <div class="col-md-4 mb-5">
+                            <h5 class="text-secondary text-uppercase mb-4">ร้านค้า</h5>
+                            <div class="d-flex flex-column justify-content-start">
+                                <a class="text-secondary mb-2" href="#"><i
+                                        class="fa fa-angle-right mr-2"></i>หน้าแรก</a>
+                                <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>สินค้า</a>
+                                <a class="text-secondary mb-2" href="#"><i
+                                        class="fa fa-angle-right mr-2"></i>ช้อปปิ้ง</a>
+                                <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ติดต่อ</a>
+
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-5">
-                        <h5 class="text-secondary text-uppercase mb-4">บัญชีของฉัน</h5>
-                        <div class="d-flex flex-column justify-content-start">
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>หน้าแรก</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>สินค้า</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ช้อปปิ้ง</a>
-                            <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ติดต่อ</a>
+                        <div class="col-md-4 mb-5">
+                            <h5 class="text-secondary text-uppercase mb-4">บัญชีของฉัน</h5>
+                            <div class="d-flex flex-column justify-content-start">
+                                <a class="text-secondary mb-2" href="#"><i
+                                        class="fa fa-angle-right mr-2"></i>หน้าแรก</a>
+                                <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>สินค้า</a>
+                                <a class="text-secondary mb-2" href="#"><i
+                                        class="fa fa-angle-right mr-2"></i>ช้อปปิ้ง</a>
+                                <a class="text-secondary mb-2" href="#"><i class="fa fa-angle-right mr-2"></i>ติดต่อ</a>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-5">
-                        <h6 class="text-secondary text-uppercase mt-4 mb-3">ช่องทางการติดตาม
-                        </h6>
-                        <div class="d-flex">
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a class="btn btn-primary btn-square" href="#"><i class="fab fa-instagram"></i></a>
+                        <div class="col-md-4 mb-5">
+                            <h6 class="text-secondary text-uppercase mt-4 mb-3">ช่องทางการติดตาม
+                            </h6>
+                            <div class="d-flex">
+                                <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-primary btn-square mr-2" href="#"><i
+                                        class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-primary btn-square mr-2" href="#"><i
+                                        class="fab fa-linkedin-in"></i></a>
+                                <a class="btn btn-primary btn-square" href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
-
-    </div>
-    <!-- Footer End -->
+        <!-- Footer End -->
 
 
 
@@ -252,25 +291,25 @@
 
 
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-primary back-to-top"><i class="fa fa-angle-double-up"></i></a>
 
 
 
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="/lib/easing/easing.min.js"></script>
-    <script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+        <!-- JavaScript Libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+        <script src="/lib/easing/easing.min.js"></script>
+        <script src="/lib/owlcarousel/owl.carousel.min.js"></script>
 
-    <!-- Contact Javascript File -->
-    <script src="/mail/jqBootstrapValidation.min.js"></script>
-    <script src="/mail/contact.js"></script>
+        <!-- Contact Javascript File -->
+        <script src="/mail/jqBootstrapValidation.min.js"></script>
+        <script src="/mail/contact.js"></script>
 
-    <!-- Template Javascript -->
-    <script src="/js/main.js"></script>
-    <script src="/js/test.js"></script>
+        <!-- Template Javascript -->
+        <script src="/js/main.js"></script>
+        <script src="/js/test.js"></script>
 </body>
 
 </html>

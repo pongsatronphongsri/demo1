@@ -19,39 +19,59 @@
         <% relationships.forEach(relationship => { %>
             <form action="/admin/edit" method="POST" >
                 <input type="hidden" name="product_id" value="<%= relationship.product_id %>">
+              
                 <div class="mb-3">
-                    <label for="brand_id" class="form-label">Brand ID:</label>
-                    <input type="text" class="form-control" id="brand_id" name="brand_id" value="<%= relationship.brand_id %>">
+                    <label for="brand_name" class="form-label">ชื่อเเบรนด์:</label>
+                    <input type="text" class="form-control" id="brand_name" name="brand_name" value="<%= relationship.brand_name %>">
                 </div>
                 <div class="mb-3">
-                    <label for="detail_id" class="form-label">Detail ID:</label>
+                    <label for="detail_id" class="form-label">รหัสรุ่นสินค้า:</label>
                     <input type="text" class="form-control" id="detail_id" name="detail_id" value="<%= relationship.detail_id %>">
                 </div>
                 <div class="mb-3">
-                    <label for="details" class="form-label">Details:</label>
+                    <label for="details" class="form-label">ชื่อรุ่นสินค้า</label>
                     <textarea class="form-control" id="details" name="details"><%= relationship.details %></textarea>
                 </div>
                 <div class="mb-3">
-                    <label for="picture" class="form-label">Picture:</label>
-                    <input type="file" class="form-control" id="picture" name="picture" >
+                    <label for="picture" class="form-label">รูปภาพ:</label>
+                    <input type="file" class="form-control" id="picture" name="picture"  >
                 </div>
-                
-               
-
-                
-                
                 <div class="mb-3">
-                    <label for="price" class="form-label">Price:</label>
+                    <label for="currentPicture" class="form-label">รูปภาพปัจจุบัน:</label>
+                    <img src="<%= relationship.picture %>" alt="Current Picture" style="max-width: 200px;">
+                </div>
+                <script>  document.querySelectorAll('form').forEach(form => {
+                    form.addEventListener('submit', event => {
+                        const fileInput = form.querySelector('input[type="file"]');
+                        if (!fileInput.files.length) {
+                            const currentPicture = form.querySelector('img').getAttribute('src').replace('/img/', '');
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'currentPicture';
+                            hiddenInput.value = currentPicture;
+                            form.appendChild(hiddenInput);
+                        }
+                    });
+                }); 
+              </script>
+                
+                
+                
+           
+               <div class="mb-3">
+                    <label for="price" class="form-label">ราคา:</label>
                     <input type="text" class="form-control" id="price" name="price" value="<%= relationship.price %>">
                 </div>
                 <div class="mb-3">
-                    <label for="text" class="form-label">Text:</label>
+                    <label for="text" class="form-label">รายละเอียดสินค้า:</label>
                     <input type="text" class="form-control" id="text" name="text" value="<%= relationship.text %>">
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn btn-primary">ยืนยันการเเก้ไขข้อมูล</button>
             </form>
             <hr>
         <% }) %>
+        
+        
     </div>
 
     <!-- Bootstrap JS (Optional) -->

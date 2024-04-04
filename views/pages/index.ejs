@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>GiantShop</title>
+    <title>JiantShop</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="Free HTML Templates" name="keywords">
     <meta content="Free HTML Templates" name="description">
@@ -24,6 +24,44 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <style>
+        /* ปรับให้ข้อความทะลุกรอบ */
+        #navbar-vertical .dropdown-item {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #navbar-vertical .dropdown-item:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+
+            z-index: 1;
+
+        }
+
+        #navbar-vertical .dropdown-item:hover:before {
+            left: 0;
+        }
+
+        /* เพิ่มสี highlight เมื่อ hover */
+        #navbar-vertical .dropdown-item:hover {
+            background-color: rgba(255, 255, 0, 0.8);
+            /* สีพื้นหลังของ highlight */
+        }
+
+        /* CSS for reducing the font size of category names */
+        .navbar-vertical .navbar-nav .nav-item a {
+            font-size: 14px;
+            /* adjust the font size as needed */
+        }
+
+       
+    </style>
+
 </head>
 
 <body>
@@ -37,7 +75,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -78,7 +116,7 @@
 
 
 
-               
+
             </div>
         </div>
     </div>
@@ -90,17 +128,19 @@
         <div class="row px-xl-5">
             <div class="col-lg-3 d-none d-lg-block">
                 <a class="btn d-flex align-items-center justify-content-between bg-primary w-100" data-toggle="collapse"
-                    href="#navbar-vertical" style="height: 65px; padding: 0 30px;">
+                    href="#navbar-vertical" style="height: 65px; padding: 0 20px;">
                     <h6 class="text-dark m-0"><i class="fa fa-bars mr-2"></i>หมวดหมู่สินค้า</h6>
                     <i class="fa fa-angle-down text-dark"></i>
                 </a>
                 <nav class="collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light"
                     id="navbar-vertical" style="width: calc(100% - 30px); z-index: 999;">
-                    <div class="navbar-nav w-100">
+                    <div class="navbar-nav w-100" >
                         <div class="nav-item dropdown dropright">
-                            <% categories.forEach(category => { %>
-                                <a class="dropdown-item" href="/?category=<%= category.id %>"><%= category.name %></a>
-                            <% }); %>
+                            <% categories.forEach(category=> { %>
+                                <a class="dropdown-item" href="/?category=<%= category.id %>">
+                                    <%= category.name %>
+                                </a>
+                                <% }); %>
 
                         </div>
                     </div>
@@ -120,7 +160,7 @@
                         <div class="navbar-nav mr-auto py-0">
                             <a href="/" class="nav-item nav-link active">หน้าเเรก</a>
                             <a href="/shop" class="nav-item nav-link">สินค้า</a>
-                           
+
 
                             <a href="/contact" class="nav-item nav-link">ติดต่อ</a>
                         </div>
@@ -137,16 +177,27 @@
                                 </span>
                             </a>
                              -->
-                       
+
+
+                            <div>
+                                <div style="display: inline-block; margin-right: 10px;">
+                                    <a href="/cart_product" class="btn btn-primary">
+                                        <i class="fas fa-shopping-cart"></i> ตระกร้าสินค้า
+
+                                    </a>
+                                </div>
 
 
 
-                        </div>
-                        <a href="/my-orders" class="btn btn-primary">
-                            <i class="fas fa-shopping-bag"></i> My Orders
-                        </a>
-                        
-                    </div>
+
+
+                                <div style="display: inline-block;">
+                                    <a href="/my-orders" class="btn btn-primary">
+                                        <i class="fas fa-shopping-bag"></i> สินค้าที่สั่งซื้อ
+                                    </a>
+                                </div>
+                            </div>
+
                 </nav>
             </div>
         </div>
@@ -164,8 +215,7 @@
                         <div class="product-img position-relative overflow-hidden">
                             <img class="img-fluid w-100" src="<%= printer.picture %>" alt="">
                             <div class="product-action">
-                                <a class="btn btn-outline-dark btn-square" href="/shop"><i
-                                        class="fa fa-search"></i></a>
+                                <a class="btn btn-outline-dark btn-square" href="/shop"><i class="fa fa-search"></i></a>
                             </div>
                         </div>
                         <div class="text-center py-4">
@@ -174,7 +224,7 @@
                             </a>
                             <div class="d-flex align-items-center justify-content-center mt-2">
                                 <h5>
-                                    
+
                                 </h5>
                                 <h6 class="text-muted ml-2"></h6>
                             </div>
@@ -185,8 +235,8 @@
                 <% }); %>
         </div>
         <!-- Products End -->
-       
-        
+
+
         <!-- Footer Start -->
         <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
             <div class="row px-xl-5 pt-5">
@@ -226,8 +276,9 @@
                         <div class="col-md-4 mb-5">
                             <h6 class="text-secondary text-uppercase mt-4 mb-3">ช่องทางการติดตาม</h6>
                             <div class="d-flex">
-                                
-                                <a class="btn btn-primary btn-square mr-2" href="https://web.facebook.com/p/Jiant-Blue-Systems-%E0%B9%84%E0%B8%88%E0%B9%81%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B9%8C%E0%B8%9A%E0%B8%B9%E0%B8%A5%E0%B8%8B%E0%B8%B4%E0%B8%AA%E0%B9%80%E0%B8%97%E0%B9%87%E0%B8%A1%E0%B8%AA%E0%B9%8C-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%88%E0%B8%B5%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%A3%E0%B8%B5-100057589354258/?_rdc=1&_rdr"><i
+
+                                <a class="btn btn-primary btn-square mr-2"
+                                    href="https://web.facebook.com/p/Jiant-Blue-Systems-%E0%B9%84%E0%B8%88%E0%B9%81%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B9%8C%E0%B8%9A%E0%B8%B9%E0%B8%A5%E0%B8%8B%E0%B8%B4%E0%B8%AA%E0%B9%80%E0%B8%97%E0%B9%87%E0%B8%A1%E0%B8%AA%E0%B9%8C-%E0%B8%9B%E0%B8%A3%E0%B8%B2%E0%B8%88%E0%B8%B5%E0%B8%99%E0%B8%9A%E0%B8%B8%E0%B8%A3%E0%B8%B5-100057589354258/?_rdc=1&_rdr"><i
                                         class="fab fa-facebook-f"></i></a>
                                 <a class="btn btn-primary btn-square mr-2" href="#"><i
                                         class="fab fa-linkedin-in"></i></a>
@@ -263,7 +314,7 @@
         <!-- Contact Javascript File -->
         <script src="mail/jqBootstrapValidation.min.js"></script>
         <script src="mail/contact.js"></script>
-
+     
         <!-- Template Javascript -->
         <script src="js/main.js"></script>
         <script src="js/test.js"></script>

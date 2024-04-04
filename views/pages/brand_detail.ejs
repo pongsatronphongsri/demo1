@@ -38,7 +38,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -150,7 +150,7 @@
     <!-- Navbar End -->
     <div class="container-fluid pt-5 pb-3">
         <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4">
-            <span class="bg-secondary pr-3">Brand Detail</span>
+            <span class="bg-secondary pr-3">ข้อมูลสินค้า</span>
         </h2>
 
         <% if (productDetails.brands && productDetails.brands.length > 0) { %>
@@ -161,12 +161,12 @@
                             <img src="<%= brand.brand_picture %>" class="card-img-top mx-auto"
                                 alt="<%= brand.brand_name %>" style="width: 250px; height: 250px;">
         
-                            <h6 class="card-subtitle mb-2 text-muted">Brand: <%= brand.brand_name %></h6>
-                            <p class="card-text">Model: <%= brand.brand_details %></p>
-                            <p class="card-text">Price: <%= brand.brand_price %> บาท</p>
+                            <h6 class="card-subtitle mb-2 text-muted">ยี่ห้อ: <%= brand.brand_name %></h6>
+                            <p class="card-text">รุ่น: <%= brand.brand_details %></p>
+                            <p class="card-text">ราคา: <%= brand.brand_price %> บาท</p>
         
                             <!-- Button to view more details -->
-                            <a href="/product-detail/<%= brand.detail_id %>" class="btn btn-primary">View Brand Details</a>
+                            <a href="/product-detail/<%= brand.detail_id %>" class="btn btn-primary">ดูรายละเอียดสินค้า</a>
                         </div>
                     </div>
                 <% }); %>

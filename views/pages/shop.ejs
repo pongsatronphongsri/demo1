@@ -37,7 +37,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -158,31 +158,31 @@
         <h3>ผลการค้นหาสำหรับ : "<%= searchQuery %>"</h3>
     <% } %>
 
+    
     <% products.forEach(product => { %>
-        <% if (!searchQuery || (searchQuery && (product.model && product.model.includes(searchQuery)) || (product.product_detail && product.product_detail.includes(searchQuery)))) { %>
+        <% if (!searchQuery || (searchQuery && (product.model && product.model.includes(searchQuery)))) { %>
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">
                         <%= product.model %>
                     </h5>
-                    <div class="card-text">
-                        <p><strong>Product Details:</strong> <%= product.product_detail %></p>
-                        <!-- Dropdown List -->
-                        <!-- Button to View Product Details -->
-                        <div class="dropdown">
-                            <a class="btn btn-secondary" href="/brand-detail/<%= product.product_id %>">
-                                View Product Details
-                            </a>
-                        </div>
+                    <!-- Button to View Product Details -->
+                    <div class="dropdown">
+                        <a class="btn btn-secondary" href="/brand-detail/<%= product.product_id %>">
+                            ดูข้อมูลสินค้า
+                        </a>
                     </div>
                 </div>
             </div>
         <% } %>
     <% }); %>
+    
 
+   
     <% if (products.filter(product => (!searchQuery || (searchQuery && ((product.model && product.model.includes(searchQuery)) || (product.product_detail && product.product_detail.includes(searchQuery)))))).length === 0) { %>
         <p>No products available.</p>
     <% } %>
+    
 </div>
 
 

@@ -38,7 +38,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -156,7 +156,7 @@
             for (const item of cartItems) {
                 total += item.price * item.quantity;
             }
-            return total;
+            return total.toLocaleString('th-TH');
         } %>
         <h1>ตระกร้าสินค้า</h1>
     
@@ -180,6 +180,7 @@
                             <td><%= item.quantity %></td>
                             <td><%= item.price.toFixed(2) %> บาท</td>
                             <td><%= (item.quantity * item.price).toFixed(2) %> บาท</td>
+                            
                             <td><img src="<%= item.picture %>" alt="<%= item.productName %>" style="max-width: 50px; height: auto;"></td>
                             <td>
                                 <form action="/update_cart_quantity" method="post" class="d-inline">
@@ -208,7 +209,8 @@
                 <%= calculateTotal(cartItems) %>
             </span> บาท</p>
           
-            <a  href="/checkout" class="btn btn-success">ชำระเงิน</a>
+            <!-- <a  href="/checkout" class="btn btn-success">ชำระเงิน</a> -->
+            <a href="/confirm_checkout" class="btn btn-success">สั่งซื้อสินค้า</a>
           
          
             

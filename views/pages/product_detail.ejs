@@ -37,7 +37,7 @@
             <!-- Logo or brand -->
             <div class="col-lg-4">
                 <a href="" class="text-decoration-none">
-                    <span class="h1 text-uppercase text-primary bg-dark px-2">Giant</span>
+                    <span class="h1 text-uppercase text-primary bg-dark px-2">Jiant</span>
                     <span class="h1 text-uppercase text-dark bg-primary px-2 ml-n1">Shop</span>
                 </a>
             </div>
@@ -184,17 +184,23 @@
                         <input type="number" name="quantity" value="1" min="1" required />
                                 
                         <!-- Add to Cart button -->
-                        <button type="submit">Add to Cart</button>
+                        <button type="submit">เพิ่มเข้าตระกร้าสินค้า</button>
                     </form>
                     
 
                     <div class="d-flex pt-2">
-                        <strong class="text-dark mr-2">Share on:</strong>
-                        <div class="d-inline-flex">
-                            <a class="text-dark px-2" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-linkedin-in"></i></a>
-                            <a class="text-dark px-2" href=""><i class="fab fa-pinterest"></i></a>
+                      
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="tab-pane-1">
+                                <h4 class="mb-3">รายละเอียดสินค้า</h4>
+                                <% if (productDetails.brands && productDetails.brands.length > 0) { %>
+                                    <%= productDetails.brands[0].brand_text %>
+                                <% } else { %>
+                                    <p>No associated brands found for this product.</p>
+                                <% } %>
+                            </div>
+                            <!-- Add content for other tabs if needed -->
+        
                         </div>
                     </div>
                 <% } else { %>
@@ -204,29 +210,7 @@
         </div>
     </div>
 
-    <div class="row px-xl-5 mt-lg-5">
-        <div class="col">
-            <div class="bg-light p-30">
-                <div class="nav nav-tabs mb-4">
-                    <a class="nav-item nav-link text-dark active" data-toggle="tab" href="#tab-pane-1">คำอธิบาย</a>
-                    <!-- Add more tabs if needed -->
-
-                </div>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="tab-pane-1">
-                        <h4 class="mb-3">รายละเอียดสินค้า</h4>
-                        <% if (productDetails.brands && productDetails.brands.length > 0) { %>
-                            <%= productDetails.brands[0].brand_text %>
-                        <% } else { %>
-                            <p>No associated brands found for this product.</p>
-                        <% } %>
-                    </div>
-                    <!-- Add content for other tabs if needed -->
-
-                </div>
-            </div>
-        </div>
-    </div>
+   
 </div>
 <!-- Shop Detail End -->
 

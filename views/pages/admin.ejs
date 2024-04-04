@@ -54,6 +54,25 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    <style>
+        /* Custom styles here */
+        body {
+            padding-top: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .btn-container {
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 
 <body>
@@ -72,7 +91,7 @@
                 </a>
             </div>
             <!-- Search bar -->
-          
+
             <!-- Button groups -->
             <div class="col-lg-6 text-right">
                 <div class="btn-group mr-2">
@@ -97,7 +116,7 @@
 
 
 
-               
+
             </div>
         </div>
     </div>
@@ -106,136 +125,26 @@
 
 
     <div class="container">
-
-
-        <h2>ข้อมูลประเภทสินค้า</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ชื่อ</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% categories.forEach(category=> { %>
-                    <tr>
-                        <td>
-                            <%= category.name %>
-                        </td>
-                        <td>
-                            <a href="/admin/edit/category/<%= category.id %>" class="btn btn-sm btn-primary">เเก้ไข</a>
-
-                            <a href="/admin/delete/category/<%= category.id %>" class="btn btn-sm btn-danger">ลบ</a>
-                        </td>
-                    </tr>
-                    <% }) %>
-            </tbody>
-        </table>
-        <a href="/admin/add" class="btn btn-primary">เพิ่มข้อมูลประเภทสินค้า</a>
-
-
-
-        <h2>ข้อมูลสินค้า</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>ID</th>
-                    <th>Detail_ID</th>
-                    <th>Details</th>
-                    <th>Picture</th>
-                    <th>Price</th>
-                    <th>Text</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% relationships.forEach(relationship=> { %>
-                    <tr>
-                        <td>
-                            <%= relationship.product_id %>
-                        </td>
-                        <td>
-                            <%= relationship.brand_id %>
-                        </td>
-                        <td>
-                            <%= relationship.detail_id %>
-                        </td>
-                        <td>
-                            <%= relationship.details %>
-                        </td>
-                        <td style="width: 100px; height: 100px;">
-                            <img src="<%= relationship.picture %>" alt="Product Picture"
-                                style="max-width: 100%; max-height: 100%;">
-                        </td>
-
-                        <td>
-                            <%= relationship.price %>
-                        </td>
-                        <td>
-                            <%= relationship.text %>
-                        </td>
-                        <td>
-                            <!-- Edit link for product_brand_relationship -->
-
-
-
-
-                            <a href="/admin/edit?action=edit&table=product_brand_relationship&detail_id=<%= relationship.detail_id %>"
-                                class="btn btn-sm btn-primary">เเก้ไข</a>
-
-
-
-                            <form action="/admin/deleteproduct" method="POST">
-                                <input type="hidden" name="table" value="product_brand_relationship">
-                                <input type="hidden" name="id" value="<%= relationship.detail_id %>">
-                                <button class="btn btn-sm btn-danger" type="submit">Delete</button>
-                            </form>
-
-
-                        </td>
-                    </tr>
-                    <% }) %>
-            </tbody>
-        </table>
-        <a href="/admin/addproduct?action=add&table=product_brand_relationship"
-            class="btn btn-primary">เพิ่มข้อมูลสินค้า</a>
-        <br>
-        <h3>Admins</h3>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Email</th>
-               
-                </tr>
-            </thead>
-            <tbody>
-                <% admins.forEach(admin => { %>
-                    <tr>
-                        <td><%= admin.username %></td>
-                        <td><%= admin.email %></td>
-                        
-                       
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
-        
-        <a href="/admin/add-admin" class="btn btn-primary">Add Admin</a><br><br>
-   
-        <a href="/admin/orders" class="btn btn-primary">View Orders</a><br><br>
-
-        <a href="/admin/orders/export" class="btn btn-primary">Export Orders</a>
-
-      
-       
-     
-    
-      
-
-        
-
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="btn-container">
+                    <a href="/admin/categories" class="btn btn-primary btn-lg btn-block">จัดการข้อมูลประเภทสินค้า</a>
+                </div>
+                <div class="btn-container">
+                    <a href="/admin/product" class="btn btn-primary btn-lg btn-block">จัดการข้อมูลสินค้า</a>
+                </div>
+                <div class="btn-container">
+                    <a href="/showadmin" class="btn btn-primary btn-lg btn-block">จัดการข้อมูลสมาชิกพนักงาน</a>
+                </div>
+                <div class="btn-container">
+                    <a href="/admin/orders" class="btn btn-primary btn-lg btn-block">ข้อมูลคำสั่งซื้อสินค้า</a>
+                </div>
+                <div class="btn-container">
+                    <a href="/admin/orders/export-form" class="btn btn-primary btn-lg btn-block">ออกรายงานยอดขายสินค้า</a>
+                </div>
+                
+            </div>
+        </div>
     </div>
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-secondary mt-5 pt-5">
@@ -270,13 +179,7 @@
                         </div>
                     </div>
                     <div class="col-md-4 mb-5">
-                        <h6 class="text-secondary text-uppercase mt-4 mb-3">ช่องทางการติดตาม</h6>
-                        <div class="d-flex">
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-primary btn-square mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a class="btn btn-primary btn-square" href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
+
                     </div>
                 </div>
             </div>

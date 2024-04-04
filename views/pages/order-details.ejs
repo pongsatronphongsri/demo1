@@ -1,0 +1,217 @@
+<!-- order-details.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        /* Custom CSS for the table */
+        /* Custom CSS for the table */
+        .table {
+            font-size: 0.9rem;
+            /* Adjust the font size */
+            width: 100%;
+            /* Set the table width to 100% */
+        }
+
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            /* Padding inside table cells */
+            vertical-align: top;
+            /* Align text to the top of cells */
+        }
+
+        .table thead th {
+            vertical-align: middle;
+            /* Align header text to the middle */
+        }
+
+        .table-bordered {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            /* Light border around the table */
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            /* Border for table cells */
+        }
+
+        .product-image {
+            max-width: 100px;
+            /* Adjust the maximum width of the image */
+        }
+
+
+
+
+
+        /* Center the image horizontally */
+        .image-container {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="container">
+        <a href="/admin/orders" class="btn btn-secondary">ย้อนกลับ</a>
+        <h2>ข้อมูลที่อยู่รายละเอียดลูกค้า</h2>
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th>ชื่อ</th>
+                    <td>
+                        <%= userDetails.username %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>อีเมลล์</th>
+                    <td>
+                        <%= userDetails.email %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>เบอร์โทรศัพท์</th>
+                    <td>
+                        <%= userDetails.phone %>
+                    </td>
+                </tr>
+                <tr>
+                    <th>ที่อยู่</th>
+                    <td>
+                        <%= userDetails.AddressLine1 %>, อำเภอ:<%= userDetails.District %>, ตำบล:<%=
+                                    userDetails.SubDistrict %>,
+                                    จังหวัด:<%= userDetails.Province %>, รหัสไปรษณีย์:<%= userDetails.PostalCode %>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>ข้อมูลสั่งซื้อสินค้า</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ชื่อสินค้า</th>
+                    <th>จำนวน</th>
+                    <th>ราคา/ชิ้น</th>
+                    <th>ราคารวม</th>
+                    <th>รูปภาพสินค้า</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% let totalPrice=0; %>
+                    <% orderDetails.forEach(detail=> { %>
+                        <% let itemPrice=detail.quantity * detail.price; %>
+                            <% totalPrice +=itemPrice; %>
+                                <tr>
+                                    <td>
+                                        <%= detail.details %>
+                                    </td>
+                                    <td>
+                                        <%= detail.quantity %>
+                                    </td>
+                                    <td>
+                                        <%= detail.price %>
+                                    </td>
+                                    <td>
+                                        <%= itemPrice.toFixed(2) %>
+                                    </td>
+                                    <td><img class="product-image" src="<%= detail.picture %>"
+                                            alt="<%= detail.details %>" style="max-width: 100px;"></td>
+                                </tr>
+                                <% }); %>
+                                    <tr>
+                                        <td colspan="3" style="text-align: right;"><strong>ราคารวมทั้งหมด:</strong></td>
+                                        <td>
+                                            <%= totalPrice.toFixed(2) %>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+            </tbody>
+        </table>
+
+
+        <h2>หลักฐานการชำระเงิน</h2>
+        <div class="image-container">
+            <img class="product-image" src="<%= orderPayment %>" alt="Payment Evidence" style="max-width: 500px;">
+
+        </div>
+        <div class="payment-status">
+            <p><strong>สถานะการชำระเงิน:</strong>
+                <% if (orderPaymentStatus==='ชำระเงินแล้ว' ) { %>
+                    <span style="color: green;">
+                        <%= orderPaymentStatus %>
+                    </span>
+                    <% } else { %>
+                        <span style="color: red;">
+                            <%= orderPaymentStatus %>
+                        </span>
+                        <% } %>
+            </p>
+            <form action="/admin/update-payment-status/<%= orderId %>" method="post">
+                <select name="paymentStatus" id="paymentStatus">
+                    <option value="ชำระเงินแล้ว" <%=orderPaymentStatus==='ชำระเงินแล้ว' ? 'selected' : '' %>
+                        >ชำระเงินแล้ว</option>
+                    <option value="ยังไม่ชำระเงิน" <%=orderPaymentStatus==='ยังไม่ชำระเงิน' ? 'selected' : '' %>
+                        >ยังไม่ชำระเงิน</option>
+                </select>
+                <button type="submit">อัปเดตสถานะการชำระเงิน</button>
+            </form>
+        </div>
+        <h2>สถานะการขนส่ง</h2>
+        <div>
+            <p><strong>สถานะการขนส่ง: <%= deliveryStatus %></strong>
+            <form action="/admin/update-delivery-status/<%= orderId %>" method="post">
+                <select name="deliveryStatus" id="deliveryStatus">
+                    <option value="กำลังจัดส่ง" <%=deliveryStatus==='กำลังจัดส่ง' ? 'selected' : '' %>>กำลังจัดส่ง
+                    </option>
+                    <option value="จัดส่งแล้ว" <%=deliveryStatus==='จัดส่งแล้ว' ? 'selected' : '' %>>จัดส่งแล้ว</option>
+                </select>
+                <button type="submit">อัปเดตสถานะการจัดส่ง</button>
+            </form>
+
+
+        </div>
+        
+
+    </div>
+
+
+    </div>
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.4.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

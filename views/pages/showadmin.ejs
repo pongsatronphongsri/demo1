@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <!-- Link Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Your custom CSS -->
+    <style>
+        /* Custom styles here */
+    </style>
+</head>
+<body>
+    <!-- Include the "Admins" table from the admin page -->
+    <div class="container mt-5">
+        <a href="/admin" class="btn btn-secondary">กลับไปที่หน้าadmin</a>
+        <h3>จัดการข้อมูลสมาชิกพนักงาน</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>อีเมลล์</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% admins.forEach(admin => { %>
+                    <tr>
+                        
+                        <td><%= admin.username %></td>
+                        <td><%= admin.email %></td>
+                        <td>
+                            <!-- Add a button to delete the admin with the corresponding id -->
+                            <form action="/admin/delete-admin" method="POST">
+                                <input type="hidden" name="adminId" value="<%= admin.id %>">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('ยืนยันการลบข้อมูลพนักงาน')">ลบ</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+        <!-- Add a button to access the "Admins" table from this page -->
+        <a href="/admin/add-admin" class="btn btn-primary">เพิ่มสามาชิก</a>
+       
+    </div>
+
+    <!-- Link Bootstrap JS and dependencies (optional, if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Your custom scripts (if any) -->
+    <script>
+        // Custom scripts here
+    </script>
+</body>
+</html>
