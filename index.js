@@ -150,7 +150,7 @@ app.post('/login', (req, res) => {
 
     connection.query(selectQuery, [email], async (err, results) => {
         if (err || results.length === 0) {
-            res.status(401).send('<script>alert("Invalid email or password");</script>');
+            res.status(401).send('<script>alert("ไม่พบข้อมูลaccountของท่าน"); window.location.href = "/login";</script>');
 
             return;
         }
@@ -159,7 +159,7 @@ app.post('/login', (req, res) => {
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
-            res.status(401).send('<script>alert("Invalid email or password"); window.location.href = "/login";</script>');
+            res.status(401).send('<script>alert("emailหรือรหัสผ่านไม่ถูกต้อง"); window.location.href = "/login";</script>');
 
             return;
         }
@@ -1067,7 +1067,7 @@ app.post('/admin/orders/export', async function (req, res) {
         // Add rows to the Excel sheet
         ordersResult.forEach(order => {
             worksheet.addRow({
-                order_date: order.order_date.toISOString().split('T')[0],
+                order_date: order.order_date.toLocaleDateString('en-GB'),
                 order_id: order.order_id,
                 username: order.username,
                 delivery_status: order.delivery_status,
@@ -2160,13 +2160,23 @@ app.post('/contact', function (req, res) {
 
 
 app.get('/contact', function (req, res) {
-    res.render('pages/contact', {
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+    pool.query('SELECT * FROM category', (err, categories) => {
+        if (err) {
+            return res.render('pages/error', { error: 'Error fetching categories' });
+        }
+
+        res.render('pages/contact', {
+            name: '',
+            email: '',
+            subject: '',
+            message: '',
+            username: req.session.user ? req.session.user.username : null,
+            categories: categories
+        });
     });
 });
+
+
 
 
 

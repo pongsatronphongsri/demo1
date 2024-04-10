@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,32 +80,36 @@
         }
     </style>
 </head>
+
 <body>
     <!-- pages/add-admin.ejs -->
 
-<h1>Add New Admin</h1>
+    <h1>เพิ่มข้อมูลพนักงาน</h1>
 
-<!-- /admin/add-admin.ejs -->
-<form action="/admin/add-admin" method="POST">
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-    </div>
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-    </div>
-    <div class="form-group">
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required>
-    </div>
-    <button type="submit" class="btn btn-primary">บันทึกข้อมูล</button>
-</form>
+    <!-- /admin/add-admin.ejs -->
+    <form action="/admin/add-admin" method="POST">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+        <button type="submit" class="btn btn-primary">บันทึกข้อมูล</button>
+    </form>
 
-<a href="/admin" class="btn btn-secondary">Back</a> <!-- Back button -->
+    <div>
+        <a href="/admin" class="btn btn-secondary">Back</a> <!-- Back button -->
+    </div>
 </body>
+
 </html>

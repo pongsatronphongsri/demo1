@@ -166,10 +166,14 @@
                 <label for="confirmPassword">ยืนยันรหัสผ่าน:</label>
                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
             </div>
-            <button type="submit" class="btn btn-primary">ยืนยันการสมัคร</button>
+            <button type="submit" class="btn btn-primary"  onclick="return confirmRegistration();" >ยืนยันการสมัคร</button>
         </form>
     </div>
-
+    <script>
+        function confirmRegistration() {
+            return confirm("คุณต้องการยืนยันการสมัครใช่หรือไม่?");
+        }
+    </script>
     
 
     <!-- Footer Start -->
